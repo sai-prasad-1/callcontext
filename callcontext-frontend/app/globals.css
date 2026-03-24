@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* ─── CallContext Design System ─── */
+/* Fonts loaded via next/font in layout.tsx for performance */
+
+@theme inline {
+  /* Brand — Deep teal/green: trust, growth, nature */
+  --color-brand-50:  #E8F5F0;
+  --color-brand-100: #C8E6D8;
+  --color-brand-200: #9BD4BC;
+  --color-brand-300: #6BBF9E;
+  --color-brand-400: #42A883;
+  --color-brand-500: #2D8F6F;
+  --color-brand-600: #247558;
+  --color-brand-700: #1B5B43;
+  --color-brand-800: #13412F;
+  --color-brand-900: #0B281D;
+
+  /* Accent — Soft amber/gold: warmth, delight, attention */
+  --color-accent-50:  #FFF8EB;
+  --color-accent-100: #FEECC0;
+  --color-accent-200: #FDD889;
+  --color-accent-300: #FCC44F;
+  --color-accent-400: #F5AD1F;
+  --color-accent-500: #D99512;
+  --color-accent-600: #B5780E;
+  --color-accent-700: #8E5C0B;
+  --color-accent-800: #674108;
+  --color-accent-900: #3F2704;
+
+  /* Warm neutrals (NOT cool blue-grays) */
+  --color-warm-25:  #FCFCFB;
+  --color-warm-50:  #F9F8F6;
+  --color-warm-100: #F3F1ED;
+  --color-warm-150: #EBE9E3;
+  --color-warm-200: #E0DDD5;
+  --color-warm-300: #CBC7BC;
+  --color-warm-400: #A9A49A;
+  --color-warm-500: #858078;
+  --color-warm-600: #666259;
+  --color-warm-700: #4A473F;
+  --color-warm-800: #2E2C27;
+  --color-warm-900: #1A1917;
+
+  /* Semantic status colors */
+  --color-success-50:  #ECFDF5;
+  --color-success-500: #10B981;
+  --color-success-700: #047857;
+
+  --color-warning-50:  #FFFBEB;
+  --color-warning-500: #F59E0B;
+  --color-warning-700: #B45309;
+
+  --color-danger-50:  #FEF2F2;
+  --color-danger-500: #EF4444;
+  --color-danger-700: #B91C1C;
+
+  --color-info-50:  #EFF6FF;
+  --color-info-500: #3B82F6;
+  --color-info-700: #1D4ED8;
+
+  /* Typography — loaded via next/font, CSS variables set in layout.tsx */
+  --font-sans: var(--font-dm-sans), system-ui, sans-serif;
+  --font-display: var(--font-outfit), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains-mono), monospace;
+
+  /* Border radius */
+  --radius-sm:  4px;
+  --radius-md:  6px;
+  --radius-lg:  8px;
+  --radius-xl:  12px;
+  --radius-2xl: 16px;
+
+  /* Shadows — subtle, warm-toned */
+  --shadow-xs:  0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm:  0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md:  0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.04);
+  --shadow-lg:  0 10px 15px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.04);
+  --shadow-xl:  0 20px 25px rgba(0, 0, 0, 0.08), 0 8px 10px rgba(0, 0, 0, 0.04);
+
+  /* Animations */
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-fade-in: fadeIn 200ms ease-out;
+  --animate-fade-in-up: fadeInUp 200ms ease-out;
+  --animate-slide-in-right: slideInRight 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-slide-in-top: slideInTop 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Keyframes */
+@keyframes pulse-dot {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  50%      { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInTop {
+  from { opacity: 0; transform: translateY(-100%); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Base layer */
+@layer base {
+  body {
+    @apply bg-warm-50 text-warm-700 antialiased;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  *:focus-visible {
+    @apply outline-none ring-2 ring-brand-500 ring-offset-2;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
