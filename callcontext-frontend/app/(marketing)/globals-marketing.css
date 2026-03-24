@@ -1,0 +1,33 @@
+/* ─── Smooth Scroll Behavior ─── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Scroll Padding for Fixed Nav ─── */
+html {
+  scroll-padding-top: 6rem;
+}
+
+/* ─── Enhanced Focus States ─── */
+*:focus-visible {
+  outline: 2px solid theme('colors.brand.500');
+  outline-offset: 2px;
+}
+
+/* ─── Selection Color ─── */
+::selection {
+  background-color: theme('colors.brand.200');
+  color: theme('colors.brand.900');
+}

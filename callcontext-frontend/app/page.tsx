@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import LandingPage from "./(marketing)/page";
 
 export default async function RootPage({
   searchParams,
@@ -15,7 +16,7 @@ export default async function RootPage({
     
     if (!error) {
       // Successfully authenticated, redirect to dashboard
-      redirect("/");
+      redirect("/dashboard");
     } else {
       // Failed to exchange code, redirect to login with error
       redirect(`/login?error=${encodeURIComponent(error.message)}`);
@@ -36,11 +37,10 @@ export default async function RootPage({
   // Redirect to appropriate page
   if (user) {
     // User is authenticated, go to dashboard
-    // This will be caught by (dashboard)/page.tsx
     redirect("/dashboard");
   } else {
-    // User is not authenticated, go to login
-    redirect("/login");
+    // User is not authenticated, show landing page
+    return <LandingPage />;
   }
 }
 
