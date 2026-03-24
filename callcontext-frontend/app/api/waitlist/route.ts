@@ -23,8 +23,8 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Check if email already exists
-    const { data: existing, error: existingError } = await supabase
-      .from('waitlist')
+    const { data: existing, error: existingError } = await (supabase
+      .from('waitlist') as any)
       .select('id, email, position')
       .eq('email', validatedData.email)
       .single() as { data: { id: string; email: string; position: number } | null; error: any };
@@ -40,15 +40,15 @@ export async function POST(request: NextRequest) {
     }
 
     // Get current waitlist count for position
-    const { count } = await supabase
-      .from('waitlist')
+    const { count } = await (supabase
+      .from('waitlist') as any)
       .select('*', { count: 'exact', head: true });
 
     const position = (count || 0) + 1;
 
     // Insert into waitlist
-    const { data, error } = await supabase
-      .from('waitlist')
+    const { data, error } = await (supabase
+      .from('waitlist') as any)
       .insert({
         email: validatedData.email,
         full_name: validatedData.full_name || null,
@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
       .select('id, email, referral_code, position')
       .single() as { data: { id: string; email: string; referral_code: string; position: number } | null; error: any };
 
-    if (error) {
+    if (error || !data) {
       console.error('Waitlist insertion error:', error);
       return NextResponse.json(
         { error: 'Failed to join waitlist. Please try again.' },
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     if (error instanceof z.ZodError) {
       return NextResponse.json(
-        { error: 'Invalid input', details: error.errors },
+        { error: 'Invalid input', details: error.issues },
         { status: 400 }
       );
     }
@@ -102,8 +102,8 @@ export async function GET() {
   try {
     const supabase = await createClient();
 
-    const { count, error } = await supabase
-      .from('waitlist')
+    const { count, error } = await (supabase
+      .from('waitlist') as any)
       .select('*', { count: 'exact', head: true })
       .eq('status', 'pending');
 

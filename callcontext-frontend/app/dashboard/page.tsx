@@ -24,14 +24,12 @@ export default async function DashboardPage() {
 
   if (!user) return null;
 
-  // Fetch shop
-  const { data: shop } = await supabase
+  const { data: shop } = (await supabase
     .from("shops")
     .select("*")
     .eq("owner_id", user.id)
-    .single() as { data: any | null };
+    .single()) as { data: any | null };
 
-  // Fetch stats (placeholder for now - will be real queries later)
   const stats = [
     {
       label: "Total Calls",
@@ -63,7 +61,6 @@ export default async function DashboardPage() {
     },
   ];
 
-  // Setup checklist
   const setupItems = [
     {
       id: "phone",
@@ -96,7 +93,6 @@ export default async function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
-      {/* Greeting */}
       <div>
         <h1 className="text-2xl font-display font-semibold text-warm-800">
           Welcome back{user.email ? `, ${user.email.split("@")[0]}` : ""}!
@@ -106,15 +102,12 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Setup Checklist */}
       {completedCount < setupItems.length && (
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-semibold text-warm-800">
-                  Get Started
-                </h2>
+                <h2 className="text-lg font-semibold text-warm-800">Get Started</h2>
                 <p className="text-sm text-warm-500 mt-1">
                   {completedCount} of {setupItems.length} completed
                 </p>
@@ -123,7 +116,6 @@ export default async function DashboardPage() {
             </div>
           </CardHeader>
           <CardBody>
-            {/* Progress bar */}
             <div className="mb-4 h-2 bg-warm-100 rounded-full overflow-hidden">
               <div
                 className="h-full bg-brand-500 transition-all duration-300"
@@ -131,7 +123,6 @@ export default async function DashboardPage() {
               />
             </div>
 
-            {/* Checklist */}
             <div className="space-y-3">
               {setupItems.map((item) => (
                 <Link
@@ -141,21 +132,13 @@ export default async function DashboardPage() {
                 >
                   <div className="flex items-center gap-3">
                     {item.completed ? (
-                      <CheckCircle2
-                        size={20}
-                        className="text-success-500 flex-shrink-0"
-                      />
+                      <CheckCircle2 size={20} className="text-success-500 flex-shrink-0" />
                     ) : (
-                      <Circle
-                        size={20}
-                        className="text-warm-300 flex-shrink-0"
-                      />
+                      <Circle size={20} className="text-warm-300 flex-shrink-0" />
                     )}
                     <span
                       className={
-                        item.completed
-                          ? "text-warm-500 line-through"
-                          : "text-warm-700"
+                        item.completed ? "text-warm-500 line-through" : "text-warm-700"
                       }
                     >
                       {item.label}
@@ -173,7 +156,6 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((stat) => (
           <Card key={stat.label} variant="stat">
@@ -181,9 +163,7 @@ export default async function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-warm-500">{stat.label}</p>
-                  <p className="text-2xl font-semibold text-warm-800 mt-1">
-                    {stat.value}
-                  </p>
+                  <p className="text-2xl font-semibold text-warm-800 mt-1">{stat.value}</p>
                   <p className="text-xs text-success-600 mt-1">
                     {stat.change} from last week
                   </p>
@@ -199,14 +179,10 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Calls */}
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-warm-800">
-              Recent Calls
-            </h2>
+            <h2 className="text-lg font-semibold text-warm-800">Recent Calls</h2>
           </CardHeader>
           <CardBody>
             <EmptyState
@@ -224,12 +200,9 @@ export default async function DashboardPage() {
           </CardBody>
         </Card>
 
-        {/* Upcoming Reminders */}
         <Card>
           <CardHeader>
-            <h2 className="text-lg font-semibold text-warm-800">
-              Upcoming Reminders
-            </h2>
+            <h2 className="text-lg font-semibold text-warm-800">Upcoming Reminders</h2>
           </CardHeader>
           <CardBody>
             <EmptyState
@@ -248,15 +221,12 @@ export default async function DashboardPage() {
         </Card>
       </div>
 
-      {/* Trial Banner */}
       {shop?.subscription_plan === "trial" && (
         <Card className="border-accent-200 bg-accent-50">
           <CardBody>
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-warm-800">
-                  You&apos;re on a free trial
-                </h3>
+                <h3 className="font-semibold text-warm-800">You&apos;re on a free trial</h3>
                 <p className="text-sm text-warm-600 mt-1">
                   {shop.trial_ends_at
                     ? `Trial ends ${formatRelativeDate(shop.trial_ends_at)}`

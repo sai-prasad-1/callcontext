@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff } from "lucide-react";
@@ -8,7 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Input } from "@/components/ui/Input";
 import { Button } from "@/components/ui/Button";
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -19,10 +19,9 @@ export default function LoginPage() {
   const [success, setSuccess] = useState("");
 
   useEffect(() => {
-    // Check for error or success messages from URL params
     const errorParam = searchParams.get("error");
     const messageParam = searchParams.get("message");
-    
+
     if (errorParam) {
       setError(decodeURIComponent(errorParam));
     }
@@ -50,7 +49,7 @@ export default function LoginPage() {
         router.push("/dashboard");
         router.refresh();
       }
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred");
     } finally {
       setLoading(false);
@@ -59,9 +58,7 @@ export default function LoginPage() {
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold text-warm-800 mb-1">
-        Welcome back
-      </h2>
+      <h2 className="text-2xl font-semibold text-warm-800 mb-1">Welcome back</h2>
       <p className="text-sm text-warm-500 mb-6">
         Sign in to your CallContext account
       </p>
@@ -129,5 +126,13 @@ export default function LoginPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="text-sm text-warm-500">Loading...</div>}>
+      <LoginPageContent />
+    </Suspense>
   );
 }

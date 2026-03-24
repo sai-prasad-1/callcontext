@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Lock, Eye, EyeOff, Store, MapPin, AlertCircle, Globe } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Store, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Button } from "@/components/ui/Button";
@@ -63,7 +63,6 @@ const US_STATES = [
 
 const COUNTRIES = [
   { value: "US", label: "United States", disabled: false },
-  // Future expansion - disabled for now
   { value: "UK", label: "United Kingdom", disabled: true },
   { value: "CA", label: "Canada", disabled: true },
   { value: "AU", label: "Australia", disabled: true },
@@ -111,14 +110,13 @@ export default function SignupPage() {
           setErrorDetails(data.details);
         }
       } else {
-        // Show success message and redirect
         router.push(
           `/login?message=${encodeURIComponent(
             data.message || "Account created! Please check your email to verify."
           )}`
         );
       }
-    } catch (err) {
+    } catch {
       setError("Network error. Please check your connection and try again.");
     } finally {
       setLoading(false);
