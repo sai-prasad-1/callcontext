@@ -27,3 +27,38 @@ html {
   background-color: theme('colors.brand.200');
   color: theme('colors.brand.900');
 }
+
+@keyframes landingFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.landing-fade-up {
+  animation: landingFadeUp 500ms ease-out both;
+}
+
+.flow-card {
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 500ms ease,
+    transform 500ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+.flow-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.flow-card:hover {
+  border-color: theme("colors.brand.200");
+  box-shadow: 0 8px 24px rgba(22, 101, 52, 0.08);
+}

@@ -14,7 +14,7 @@ max_rows = 1000
 # Database settings
 [db]
 port = 54322
-major_version = 15
+major_version = 17
 
 # Auth settings
 [auth]
@@ -34,11 +34,5 @@ enable_confirmations = true
 enabled = true
 file_size_limit = "50MiB"
 
-# Edge Functions
-[functions]
-enabled = false
-
-# Migrations
-[migrations]
-# Automatically apply migrations on start
-auto_apply = false
+# Note:
+# Keep this file limited to keys supported by your installed Supabase CLI version.

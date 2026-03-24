@@ -6,8 +6,15 @@ import { usePathname } from "next/navigation";
 import * as LucideIcons from "lucide-react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { NAV_ITEMS, NAV_BOTTOM } from "@/lib/utils/constants";
+import { ALL_FEATURES, type FeatureKey } from "@/lib/authz/features";
 import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils/formatting";
+
+function isNavActive(pathname: string, href: string): boolean {
+  if (pathname === href) return true;
+  if (href === "/dashboard") return false;
+  return pathname.startsWith(`${href}/`);
+}
 
 export interface SidebarProps {
   user?: {
@@ -16,11 +23,18 @@ export interface SidebarProps {
     lastName?: string | null;
   } | null;
   shopName?: string;
+  /** Features allowed by RBAC + plan; empty hides gated items */
+  allowedFeatures?: FeatureKey[];
 }
 
-export function Sidebar({ user, shopName }: SidebarProps) {
+export function Sidebar({ user, shopName, allowedFeatures }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
+  const allowed = new Set<FeatureKey>(
+    allowedFeatures?.length ? allowedFeatures : ALL_FEATURES
+  );
+  const mainNav = NAV_ITEMS.filter((item) => allowed.has(item.feature));
+  const bottomNav = NAV_BOTTOM.filter((item) => allowed.has(item.feature));
 
   return (
     <aside
@@ -33,11 +47,11 @@ export function Sidebar({ user, shopName }: SidebarProps) {
       {/* Logo */}
       <div className="h-14 flex items-center px-4 border-b border-warm-200">
         {!collapsed ? (
-          <Link href="/" className="font-display text-xl font-semibold text-brand-500">
+          <Link href="/dashboard" className="font-display text-xl font-semibold text-brand-500">
             CallContext
           </Link>
         ) : (
-          <Link href="/" className="font-display text-xl font-bold text-brand-500">
+          <Link href="/dashboard" className="font-display text-xl font-bold text-brand-500">
             C
           </Link>
         )}
@@ -45,10 +59,10 @@ export function Sidebar({ user, shopName }: SidebarProps) {
 
       {/* Nav Items */}
       <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-        {NAV_ITEMS.map((item) => {
+        {mainNav.map((item) => {
           const Icon =
             LucideIcons[item.icon as keyof typeof LucideIcons] as LucideIcons.LucideIcon;
-          const isActive = pathname === item.href;
+          const isActive = isNavActive(pathname, item.href);
 
           return (
             <Link
@@ -71,10 +85,10 @@ export function Sidebar({ user, shopName }: SidebarProps) {
 
         <div className="my-2 border-t border-warm-200" />
 
-        {NAV_BOTTOM.map((item) => {
+        {bottomNav.map((item) => {
           const Icon =
             LucideIcons[item.icon as keyof typeof LucideIcons] as LucideIcons.LucideIcon;
-          const isActive = pathname === item.href;
+          const isActive = isNavActive(pathname, item.href);
 
           return (
             <Link

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Lock, Eye, EyeOff } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -13,11 +13,42 @@ export default function ResetPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [sessionReady, setSessionReady] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function validateSession() {
+      const supabase = createClient();
+      const { data } = await supabase.auth.getSession();
+
+      if (!mounted) return;
+
+      if (data.session) {
+        setSessionReady(true);
+      } else {
+        setError("Reset link is invalid or expired. Please request a new link.");
+      }
+
+      setCheckingSession(false);
+    }
+
+    validateSession();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const handleReset = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!sessionReady) {
+      setError("Your reset session is not valid. Please request a new reset link.");
+      return;
+    }
 
     if (password !== confirmPassword) {
       setError("Passwords do not match");
@@ -38,9 +69,17 @@ export default function ResetPasswordPage() {
       });
 
       if (error) {
-        setError(error.message);
+        if (error.message.toLowerCase().includes("auth session missing")) {
+          setError("Reset link expired. Please request a new password reset link.");
+        } else {
+          setError(error.message);
+        }
       } else {
-        router.push("/");
+        router.push(
+          `/login?message=${encodeURIComponent(
+            "Password updated successfully. Please sign in."
+          )}`
+        );
         router.refresh();
       }
     } catch {
@@ -59,7 +98,10 @@ export default function ResetPasswordPage() {
         Choose a new password for your account
       </p>
 
-      <form onSubmit={handleReset} className="space-y-4">
+      {checkingSession ? (
+        <p className="text-sm text-warm-500">Validating reset link...</p>
+      ) : (
+        <form onSubmit={handleReset} className="space-y-4">
         <Input
           type={showPassword ? "text" : "password"}
           label="New Password"
@@ -99,7 +141,8 @@ export default function ResetPasswordPage() {
         <Button type="submit" variant="primary" loading={loading} className="w-full">
           Reset password
         </Button>
-      </form>
+        </form>
+      )}
     </div>
   );
 }

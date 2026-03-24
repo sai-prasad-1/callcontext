@@ -15,8 +15,8 @@ export default async function RootPage({
     const { error } = await supabase.auth.exchangeCodeForSession(params.code);
     
     if (!error) {
-      // Successfully authenticated, redirect to dashboard
-      redirect("/dashboard");
+      // Successfully authenticated; keep users on landing and update navbar behavior
+      redirect("/");
     } else {
       // Failed to exchange code, redirect to login with error
       redirect(`/login?error=${encodeURIComponent(error.message)}`);
@@ -33,14 +33,8 @@ export default async function RootPage({
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  
-  // Redirect to appropriate page
-  if (user) {
-    // User is authenticated, go to dashboard
-    redirect("/dashboard");
-  } else {
-    // User is not authenticated, show landing page
-    return <LandingPage />;
-  }
+
+  // Always render landing at "/" and let UI adapt based on auth state.
+  return <LandingPage isAuthenticated={Boolean(user)} />;
 }
 

@@ -31,11 +31,34 @@ supabase/migrations/003_indexes.sql
 ```
 This adds indexes for fast queries (caller lookup, dashboard loads, etc.).
 
+#### Step 4: Waitlist (optional for landing)
+```
+supabase/migrations/004_waitlist.sql
+```
+
+#### Step 5: RBAC — shop memberships
+```
+supabase/migrations/005_rbac_shop_memberships.sql
+```
+Adds `shop_memberships` (owner/manager/staff/analyst), backfills owner rows for existing shops, and creates a trigger so new shops get an owner membership automatically.
+
+#### Step 6: RLS — shared shop access
+```
+supabase/migrations/006_rls_shop_access_and_memberships.sql
+```
+Adds `shop_ids_for_current_user()` and updates tenant RLS policies so active members—not only `shops.owner_id`—can access shop data. Defines RLS for `shop_memberships`.
+
+#### Step 7: Team invite helper (service role only)
+```
+supabase/migrations/007_lookup_user_id_by_email.sql
+```
+Adds `lookup_user_id_by_email` for the **service role** so the team invite API can attach existing auth users without exposing `auth.users` to clients.
+
 ---
 
 ## Verify Setup
 
-After running all 3 migrations, verify everything is working:
+After running all migrations through `007`, verify everything is working:
 
 ### Check Tables
 Go to "Table Editor" in Supabase dashboard - you should see:

@@ -1,272 +1,460 @@
 import {
   ArrowRight,
   Brain,
+  CalendarClock,
+  Check,
   CheckCircle2,
-  Clock,
+  Flower2,
+  History,
+  Lightbulb,
+  Mic,
   Phone,
-  Shield,
+  Search,
   Sparkles,
-  TrendingUp,
   Users,
+  Waves,
 } from "lucide-react";
 import Link from "next/link";
+import { Plus_Jakarta_Sans, Work_Sans } from "next/font/google";
 import { WaitlistForm } from "@/components/landing/WaitlistForm";
 
-export default function LandingPage() {
+const headline = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["500", "600", "700", "800"],
+});
+
+const body = Work_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+});
+
+type LandingPageProps = {
+  isAuthenticated?: boolean;
+};
+
+export default function LandingPage({ isAuthenticated = false }: LandingPageProps) {
   return (
-    <div className="min-h-screen bg-warm-50 text-warm-800">
-      <header className="sticky top-0 z-40 border-b border-warm-150 bg-warm-25/95 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6">
+    <div className={`${body.className} min-h-screen bg-[#fcf9f5] text-[#1c1c19]`}>
+      <header className="sticky top-0 z-40 bg-[#fcf9f5]/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
           <Link href="/" className="flex items-center gap-2">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-brand-500 text-white">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-[#00694e] text-white">
               <Phone size={18} />
             </span>
-            <span className="font-display text-xl font-semibold text-brand-600">
+            <span className={`${headline.className} text-xl font-bold text-[#00694e]`}>
               CallContext
             </span>
           </Link>
 
           <nav className="hidden items-center gap-8 md:flex">
-            <a href="#features" className="text-sm text-warm-600 hover:text-brand-600">
+            <a href="#features" className="text-sm font-medium text-[#3e4944] hover:text-[#00694e]">
               Features
             </a>
-            <a href="#how-it-works" className="text-sm text-warm-600 hover:text-brand-600">
-              How it works
-            </a>
-            <a href="#pricing" className="text-sm text-warm-600 hover:text-brand-600">
+            <a href="#pricing" className="text-sm font-medium text-[#3e4944] hover:text-[#00694e]">
               Pricing
             </a>
-            <a href="#waitlist" className="text-sm text-warm-600 hover:text-brand-600">
-              Waitlist
+            <a href="#resources" className="text-sm font-medium text-[#3e4944] hover:text-[#00694e]">
+              Resources
+            </a>
+            <a href="#company" className="text-sm font-medium text-[#3e4944] hover:text-[#00694e]">
+              Company
             </a>
           </nav>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/login"
-              className="hidden text-sm font-medium text-brand-600 hover:text-brand-700 sm:inline"
-            >
-              Sign in
-            </Link>
-            <a
-              href="#waitlist"
-              className="rounded-md bg-brand-500 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
-            >
-              Join waitlist
-            </a>
+            {isAuthenticated ? (
+              <Link
+                href="/dashboard"
+                className="rounded-lg bg-[#00694e] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
+              >
+                Go to Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="hidden rounded-lg px-4 py-2 text-sm font-medium text-[#3e4944] hover:bg-[#ebe8e4] sm:inline"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/signup"
+                  className="rounded-lg bg-[#00694e] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
+                >
+                  Start Free Trial
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
 
       <main>
-        <section className="border-b border-warm-150">
-          <div className="mx-auto grid max-w-7xl gap-12 px-4 py-16 sm:px-6 lg:grid-cols-2 lg:py-24">
+        <section className="px-4 pb-24 pt-16 sm:px-6 lg:px-8">
+          <div className="mx-auto grid max-w-7xl gap-16 lg:grid-cols-2 lg:items-center">
             <div>
-              <p className="inline-flex items-center gap-2 rounded-full border border-brand-200 bg-brand-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-brand-700">
+              <p className="inline-flex items-center gap-2 rounded-full bg-[#f6f3ef] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#00694e]">
                 <Sparkles size={14} />
                 AI call intelligence CRM
               </p>
 
-              <h1 className="mt-5 font-display text-4xl font-semibold leading-tight text-warm-900 sm:text-5xl">
-                Capture every customer call, without hiring extra staff.
+              <h1
+                className={`${headline.className} mt-6 text-5xl font-extrabold leading-[1.1] tracking-tight text-[#1c1c19] lg:text-6xl`}
+              >
+                Every call has <span className="italic text-[#00694e]">gold</span> in it. You&apos;re
+                losing it.
               </h1>
 
-              <p className="mt-5 max-w-xl text-base leading-7 text-warm-600 sm:text-lg">
-                CallContext helps phone-first businesses answer faster, log details automatically,
-                and follow up on every lead. You get clear transcripts, customer context, and
-                revenue insights in one place.
+              <p className="mt-6 max-w-xl text-lg leading-relaxed text-[#3e4944]">
+                Florists are not data clerks. When someone says &quot;the same roses from last
+                anniversary,&quot; don&apos;t search old notes. Let AI build your customer ledger in real
+                time while you focus on service.
               </p>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <a
-                  href="#waitlist"
-                  className="inline-flex items-center justify-center gap-2 rounded-md bg-brand-500 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-600"
-                >
-                  Get early access
-                  <ArrowRight size={16} />
-                </a>
-                <Link
-                  href="/signup"
-                  className="inline-flex items-center justify-center rounded-md border border-warm-200 bg-white px-5 py-3 text-sm font-semibold text-warm-700 transition hover:bg-warm-50"
-                >
-                  Start free trial
-                </Link>
+                {isAuthenticated ? (
+                  <Link
+                    href="/dashboard"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00694e] px-6 py-3.5 text-base font-bold text-white transition hover:brightness-110"
+                  >
+                    Open Dashboard
+                    <ArrowRight size={16} />
+                  </Link>
+                ) : (
+                  <a
+                    href="#waitlist"
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#00694e] px-6 py-3.5 text-base font-bold text-white transition hover:brightness-110"
+                  >
+                    Claim Your Ledger
+                    <ArrowRight size={16} />
+                  </a>
+                )}
+                <span className="inline-flex items-center justify-center gap-2 rounded-full bg-[#fcb327]/20 px-4 py-2 text-sm font-medium text-[#7f5600]">
+                  <Flower2 size={15} />
+                  Tailored for Master Florists
+                </span>
               </div>
+            </div>
 
-              <dl className="mt-8 grid grid-cols-2 gap-4 text-sm sm:grid-cols-3">
-                {heroStats.map((item) => (
-                  <div key={item.label} className="rounded-lg border border-warm-150 bg-white p-4">
-                    <dt className="text-warm-500">{item.label}</dt>
-                    <dd className="mt-1 text-xl font-semibold text-warm-900">{item.value}</dd>
+            <div className="relative rounded-4xl bg-[#f6f3ef] p-6 shadow-[0_12px_40px_rgba(45,143,111,0.06)] lg:rotate-2">
+              <div className="rounded-xl bg-[#ffffff] p-6">
+                <div className="mb-5 flex items-center justify-between pb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
+                    <span className={`${headline.className} font-bold text-[#00694e]`}>
+                      Live Call: Eleanor Vance
+                    </span>
                   </div>
-                ))}
-              </dl>
-            </div>
+                  <span className="text-sm font-medium text-[#3e4944]">02:45</span>
+                </div>
 
-            <div className="rounded-2xl border border-warm-200 bg-white p-6 shadow-sm sm:p-8">
-              <h2 className="font-display text-xl font-semibold text-warm-900">Live call snapshot</h2>
-              <p className="mt-2 text-sm text-warm-500">
-                A single view for your caller, intent, and next action while the call is still active.
-              </p>
+                <div className="space-y-4">
+                  <div className="rounded-2xl rounded-tl-none bg-[#f0ede9] p-4">
+                    <p className="text-sm italic text-[#3e4944]">
+                      &quot;...looking for the same roses from March 15 for my daughter&apos;s
+                      graduation.&quot;
+                    </p>
+                  </div>
 
-              <div className="mt-6 space-y-4">
-                <article className="rounded-lg border border-warm-150 bg-warm-25 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
-                    Caller context
-                  </p>
-                  <p className="mt-2 text-sm text-warm-700">
-                    <span className="font-semibold text-warm-900">Sarah Martinez</span> called about
-                    a repeat order. Last order was 14 days ago.
-                  </p>
-                </article>
-
-                <article className="rounded-lg border border-warm-150 bg-warm-25 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
-                    AI summary
-                  </p>
-                  <p className="mt-2 text-sm text-warm-700">
-                    Intent: order inquiry. Sentiment: positive. Suggested action: offer bundle and
-                    schedule next follow-up in 7 days.
-                  </p>
-                </article>
-
-                <article className="rounded-lg border border-warm-150 bg-warm-25 p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
-                    Team impact
-                  </p>
-                  <p className="mt-2 text-sm text-warm-700">
-                    Auto-log calls to CRM, reduce manual notes, and improve callback completion rates.
-                  </p>
-                </article>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="rounded-xl bg-[#fcf9f5] p-3">
+                      <p className="mb-1 text-[10px] uppercase tracking-wider text-[#3e4944]">
+                        Auto-Detected Entity
+                      </p>
+                      <p className="flex items-center gap-2 text-sm font-bold text-[#00694e]">
+                        <CalendarClock size={15} />
+                        Graduation Gift
+                      </p>
+                    </div>
+                    <div className="rounded-xl bg-[#fcf9f5] p-3">
+                      <p className="mb-1 text-[10px] uppercase tracking-wider text-[#3e4944]">
+                        Customer History
+                      </p>
+                      <p className="flex items-center gap-2 text-sm font-bold text-[#7f5600]">
+                        <History size={15} />3 Past Orders
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              <div className="absolute -bottom-6 -right-6 -z-10 h-28 w-28 rounded-full bg-[#00694e]/10 blur-3xl" />
             </div>
           </div>
         </section>
 
-        <section id="features" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-          <div className="max-w-3xl">
-            <h2 className="font-display text-3xl font-semibold text-warm-900 sm:text-4xl">
-              Built for busy teams that run on phone calls
-            </h2>
-            <p className="mt-4 text-warm-600">
-              Every feature is focused on speed-to-answer, better context, and reliable follow-up.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {features.map((feature) => (
-              <article
-                key={feature.title}
-                className="rounded-xl border border-warm-150 bg-white p-6 shadow-sm transition hover:border-brand-200 hover:shadow-md"
+        <section className="bg-[#f0ede9] px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <div className="mb-14 text-center">
+              <h2
+                className={`${headline.className} text-4xl font-extrabold tracking-tight text-[#1c1c19]`}
               >
-                <feature.icon className="text-brand-600" size={20} />
-                <h3 className="mt-4 font-display text-lg font-semibold text-warm-900">
-                  {feature.title}
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-warm-600">{feature.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
+                Running a flower shop should not mean data entry work.
+              </h2>
+              <p className="mt-3 text-lg text-[#3e4944]">
+                Manual notes lead to missed opportunities and weaker customer relationships.
+              </p>
+            </div>
 
-        <section id="how-it-works" className="border-y border-warm-150 bg-white">
-          <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-            <h2 className="font-display text-3xl font-semibold text-warm-900 sm:text-4xl">
-              How CallContext works
-            </h2>
-            <div className="mt-8 grid gap-4 md:grid-cols-3">
-              {steps.map((step, idx) => (
-                <article key={step.title} className="rounded-xl border border-warm-150 bg-warm-25 p-6">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-brand-700">
-                    Step {idx + 1}
-                  </p>
-                  <h3 className="mt-2 font-display text-lg font-semibold text-warm-900">
-                    {step.title}
+            <div className="grid gap-6 md:grid-cols-3">
+              {problemCards.map((card) => (
+                <article key={card.title} className={`${card.shape} bg-white p-7 transition hover:-translate-y-1`}>
+                  <div
+                    className={`mb-5 inline-flex h-11 w-11 items-center justify-center rounded-lg ${card.iconBg}`}
+                  >
+                    <card.icon size={20} />
+                  </div>
+                  <h3 className={`${headline.className} text-xl font-bold text-[#1c1c19]`}>
+                    {card.title}
                   </h3>
-                  <p className="mt-2 text-sm leading-6 text-warm-600">{step.description}</p>
+                  <p className="mt-3 leading-relaxed text-[#3e4944]">{card.description}</p>
                 </article>
               ))}
             </div>
           </div>
         </section>
 
-        <section id="pricing" className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:py-20">
-          <div className="max-w-3xl">
-            <h2 className="font-display text-3xl font-semibold text-warm-900 sm:text-4xl">
-              Transparent pricing for every stage
+        <section id="how-it-works" className="overflow-hidden px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2
+              className={`${headline.className} mb-14 text-center text-4xl font-extrabold tracking-tight text-[#1c1c19]`}
+            >
+              The Growth Cycle
             </h2>
-            <p className="mt-4 text-warm-600">
-              Start on trial, then pick a plan based on your call volume.
-            </p>
-          </div>
-
-          <div className="mt-10 grid gap-4 lg:grid-cols-3">
-            {pricingPlans.map((plan) => (
-              <article
-                key={plan.name}
-                className={`rounded-xl border p-6 shadow-sm ${
-                  plan.featured
-                    ? "border-brand-300 bg-brand-50"
-                    : "border-warm-150 bg-white"
-                }`}
-              >
-                {plan.featured && (
-                  <p className="inline-flex rounded-full bg-brand-100 px-2.5 py-1 text-xs font-semibold text-brand-700">
-                    Most popular
-                  </p>
-                )}
-                <h3 className="mt-3 font-display text-2xl font-semibold text-warm-900">{plan.name}</h3>
-                <p className="mt-2 text-warm-600">
-                  <span className="text-4xl font-semibold text-warm-900">${plan.price}</span>/month
-                </p>
-                <ul className="mt-5 space-y-2">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm text-warm-700">
-                      <CheckCircle2 size={16} className="mt-0.5 text-brand-600" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link
-                  href="/signup"
-                  className="mt-6 inline-flex w-full items-center justify-center rounded-md bg-brand-500 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-600"
-                >
-                  {plan.cta}
-                </Link>
-              </article>
-            ))}
+            <div className="grid gap-8 md:grid-cols-3">
+              {steps.map((step) => (
+                <article key={step.title} className="text-center">
+                  <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-[#00694e] text-white shadow-[0_12px_40px_rgba(45,143,111,0.06)]">
+                    <step.icon size={28} />
+                  </div>
+                  <h3 className={`${headline.className} mt-5 text-xl font-bold text-[#1c1c19]`}>
+                    {step.title}
+                  </h3>
+                  <p className="mt-2 text-[#3e4944]">{step.description}</p>
+                </article>
+              ))}
+            </div>
           </div>
         </section>
 
-        <section id="waitlist" className="border-t border-warm-150 bg-warm-100/40">
-          <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:py-20">
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="font-display text-3xl font-semibold text-warm-900 sm:text-4xl">
-                Join the early-access waitlist
-              </h2>
-              <p className="mt-4 text-warm-600">
-                We are onboarding businesses in batches to ensure high call quality, clean setup, and
-                reliable support from day one.
+        <section id="resources" className="bg-[#f0ede9]/50 px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2">
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-[#7f5600]">
+                The signature feature
               </p>
+              <h2 className={`${headline.className} mt-3 text-4xl font-extrabold tracking-tight text-[#1c1c19]`}>
+                The Screen Pop effect
+              </h2>
+              <p className="mt-4 text-lg leading-relaxed text-[#3e4944]">
+                Before you say hello, your screen shows customer context: past orders, preferences,
+                and important notes. You resume relationships, not just take orders.
+              </p>
+              <ul className="mt-6 space-y-3">
+                <li className="flex items-start gap-2 text-[#1c1c19]">
+                  <CheckCircle2 className="mt-0.5 text-[#00694e]" size={18} />
+                  Zero-lag profile pop under one second
+                </li>
+                <li className="flex items-start gap-2 text-[#1c1c19]">
+                  <CheckCircle2 className="mt-0.5 text-[#00694e]" size={18} />
+                  CRM context synced with each inbound call
+                </li>
+              </ul>
             </div>
-            <div className="mt-10">
+
+            <div className="rounded-3xl bg-white/75 p-7 backdrop-blur-xl shadow-[0_12px_40px_rgba(45,143,111,0.06)]">
+              <div className="space-y-5">
+                <div className="flex items-center gap-3">
+                  <div className="h-12 w-12 rounded-2xl bg-[#00694e]/10" />
+                  <div>
+                    <p className={`${headline.className} text-xl font-bold text-[#1c1c19]`}>Sarah Miller</p>
+                    <p className="text-sm text-[#3e4944]">West Village, NY</p>
+                  </div>
+                  <span className="ml-auto rounded-full bg-green-100 px-3 py-1 text-xs font-bold uppercase tracking-wider text-green-700">
+                    VIP
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-[#fcf9f5] p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-[#3e4944]">Most Purchased</p>
+                    <p className="mt-1 text-sm font-bold text-[#1c1c19]">White Peonies</p>
+                  </div>
+                  <div className="rounded-xl bg-[#fcf9f5] p-3">
+                    <p className="text-[10px] uppercase tracking-wider text-[#3e4944]">Lifetime Value</p>
+                    <p className="mt-1 text-sm font-bold text-[#1c1c19]">$2,450.00</p>
+                  </div>
+                </div>
+
+                <div className="rounded-xl bg-[#00694e]/5 p-4">
+                  <p className="text-xs font-bold uppercase tracking-wider text-[#00694e]">
+                    Internal Note
+                  </p>
+                  <p className="mt-1 text-sm italic text-[#3e4944]">
+                    &quot;Prefers eco wrapping, no plastic. Daughter loves yellow tulips.&quot;
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="features" className="px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2
+              className={`${headline.className} mb-14 text-center text-4xl font-extrabold tracking-tight text-[#1c1c19]`}
+            >
+              Tools for the modern artisan
+            </h2>
+            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+              {features.map((feature) => (
+                <article key={feature.title} className="space-y-3">
+                  <feature.icon className="text-[#00694e]" size={30} />
+                  <h3 className={`${headline.className} text-xl font-bold text-[#1c1c19]`}>
+                    {feature.title}
+                  </h3>
+                  <p className="leading-relaxed text-[#3e4944]">{feature.description}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="pricing" className="bg-[#f0ede9] px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2
+              className={`${headline.className} mb-14 text-center text-4xl font-extrabold tracking-tight text-[#1c1c19]`}
+            >
+              A plan for every bloom
+            </h2>
+            <div className="grid gap-6 md:grid-cols-3">
+              {pricingPlans.map((plan) => (
+                <article
+                  key={plan.name}
+                  className={`flex flex-col rounded-2xl p-8 ${
+                    plan.featured ? "relative z-10 scale-[1.03] bg-[#00694e] text-white shadow-2xl" : "bg-white"
+                  }`}
+                >
+                  {plan.featured && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-[#7f5600] px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-white">
+                      Most popular
+                    </span>
+                  )}
+                  <p className="text-xs font-bold uppercase tracking-widest opacity-80">{plan.name}</p>
+                  <p className="my-5 text-4xl font-extrabold">
+                    ${plan.price}
+                    <span className="text-base font-medium opacity-80">/month</span>
+                  </p>
+                  <ul className="mb-8 grow space-y-2">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex items-center gap-2 text-sm">
+                        <Check size={15} className={plan.featured ? "text-[#ffba3e]" : "text-[#00694e]"} />
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={isAuthenticated ? "/dashboard" : "/signup"}
+                    className={`inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold transition ${
+                      plan.featured
+                        ? "bg-white text-[#00694e] hover:brightness-95"
+                        : "bg-[#f6f3ef] text-[#00694e] hover:bg-[#ebe8e4]"
+                    }`}
+                  >
+                    {isAuthenticated ? "Open Dashboard" : plan.cta}
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="company" className="px-4 py-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl">
+            <h2
+              className={`${headline.className} mb-14 text-center text-4xl font-extrabold tracking-tight text-[#1c1c19]`}
+            >
+              Trusted by master florists
+            </h2>
+            <div className="grid gap-6 md:grid-cols-2">
+              {testimonials.map((item) => (
+                <article key={item.name} className="rounded-3xl bg-white p-7 italic">
+                  <p className="text-lg text-[#1c1c19]">&ldquo;{item.quote}&rdquo;</p>
+                  <div className="mt-5">
+                    <p className={`${headline.className} font-bold not-italic text-[#1c1c19]`}>
+                      {item.name}
+                    </p>
+                    <p className="text-xs uppercase tracking-widest not-italic text-[#3e4944]">
+                      {item.shop}
+                    </p>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        <section id="waitlist" className="px-4 pb-20 sm:px-6 lg:px-8">
+          <div className="mx-auto max-w-7xl rounded-4xl bg-[#00694e] p-10 text-center text-white shadow-2xl sm:p-14">
+            <h2
+              className={`${headline.className} mx-auto max-w-3xl text-4xl font-extrabold tracking-tight sm:text-5xl`}
+            >
+              Stop letting order details slip through your fingers.
+            </h2>
+            <p className="mx-auto mt-4 max-w-2xl text-lg text-[#97f5cf]">
+              Join the early access cohort and build stronger customer relationships with every
+              call.
+            </p>
+            <div className="mx-auto mt-8 max-w-4xl rounded-2xl bg-white/90 p-5 text-left text-[#1c1c19] backdrop-blur-xl">
               <WaitlistForm />
             </div>
+            <p className="mt-5 text-sm text-[#97f5cf]">No credit card required. Cancel anytime.</p>
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-warm-150 bg-white">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 py-8 text-sm text-warm-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          <p>© 2026 CallContext. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <Link href="/login" className="hover:text-brand-600">
-              Sign in
-            </Link>
-            <Link href="/signup" className="hover:text-brand-600">
-              Create account
-            </Link>
+      <footer className="bg-[#f6f3ef]">
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-10 px-8 py-14 md:grid-cols-4">
+          <div className="col-span-2 md:col-span-1">
+            <p className={`${headline.className} text-xl font-bold text-[#00694e]`}>CallContext</p>
+            <p className="mt-3 text-sm text-[#3e4944]">
+              Elevating artisanal floral businesses through intelligent conversation management.
+            </p>
           </div>
+          <div>
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#00694e]">Product</h4>
+            <ul className="space-y-2 text-sm text-[#3e4944]">
+              <li><a href="#features">Features</a></li>
+              <li><a href="#pricing">Pricing</a></li>
+              <li><a href="#resources">Documentation</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#00694e]">Company</h4>
+            <ul className="space-y-2 text-sm text-[#3e4944]">
+              <li><a href="#waitlist">Contact support</a></li>
+              <li><a href="#">Privacy policy</a></li>
+              <li><a href="#">Terms of service</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#00694e]">Access</h4>
+            <div className="space-y-2 text-sm">
+              {isAuthenticated ? (
+                <Link href="/dashboard" className="block text-[#3e4944] hover:text-[#00694e]">
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link href="/login" className="block text-[#3e4944] hover:text-[#00694e]">Login</Link>
+                  <Link href="/signup" className="block text-[#3e4944] hover:text-[#00694e]">Create account</Link>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="py-5 text-center text-xs uppercase tracking-widest text-[#6e7a73]">
+          © 2026 CallContext. All rights reserved.
         </div>
       </footer>
 
@@ -280,66 +468,90 @@ export default function LandingPage() {
   );
 }
 
-const heroStats = [
-  { label: "Businesses onboarded", value: "500+" },
-  { label: "Average setup", value: "5 min" },
-  { label: "Manual logging reduced", value: "10x" },
-];
-
-const features = [
+const problemCards = [
   {
-    icon: Brain,
-    title: "Real-time AI summaries",
+    icon: Waves,
+    title: "Forgotten preferences",
     description:
-      "Automatically extract caller intent, key details, and next actions before the call ends.",
+      "Customers expect you to remember what they love. Missing those details hurts trust and repeat orders.",
+    iconBg: "bg-[#ffdad6] text-[#93000a]",
+    shape: "rounded-[0.75rem_2.5rem_0.75rem_2.5rem]",
   },
   {
-    icon: Users,
-    title: "Customer context on every call",
+    icon: CalendarClock,
+    title: "Missed reminders",
     description:
-      "See prior orders, notes, and reminders instantly so your team responds with context.",
+      "Anniversary and birthday follow-ups should be consistent. Manual notes make this easy to miss.",
+    iconBg: "bg-[#fcb327]/20 text-[#7f5600]",
+    shape: "rounded-xl",
   },
   {
-    icon: Clock,
-    title: "Follow-up automation",
+    icon: Search,
+    title: "No customer history",
     description:
-      "Create reminders and tasks from call outcomes to reduce missed callbacks and lost leads.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Revenue and call insights",
-    description:
-      "Track conversion signals, repeat callers, and pipeline movement from your phone channel.",
-  },
-  {
-    icon: Shield,
-    title: "Compliance-ready workflows",
-    description:
-      "Consent modes and secure storage built for two-party consent states and auditability.",
-  },
-  {
-    icon: Phone,
-    title: "Fast phone setup",
-    description:
-      "Forward your business line and start capturing structured call data without hardware.",
+      "Treating repeat clients like new callers breaks premium service. Context should appear instantly.",
+    iconBg: "bg-[#1d8464]/20 text-[#00694e]",
+    shape: "rounded-[0.75rem_2.5rem_0.75rem_2.5rem]",
   },
 ];
 
 const steps = [
   {
-    title: "Connect your number",
+    icon: Phone,
+    title: "Forward number",
     description:
-      "Forward your existing business line and verify your shop profile in minutes.",
+      "Keep your current number and route inbound calls through CallContext.",
   },
   {
-    title: "Capture structured call data",
+    icon: Mic,
+    title: "Call comes in",
     description:
-      "CallContext logs customer details, intent, and outcomes to your CRM automatically.",
+      "Answer normally while transcription and context capture happens live.",
   },
   {
-    title: "Close the loop",
+    icon: Lightbulb,
+    title: "Watch the magic",
     description:
-      "Use reminders, notes, and analytics to follow up consistently and improve conversion.",
+      "Entity extraction, reminders, and customer context update automatically.",
+  },
+];
+
+const features = [
+  {
+    icon: Mic,
+    title: "Real-time transcription",
+    description:
+      "Every word captured live so your team focuses on conversation, not note-taking.",
+  },
+  {
+    icon: Brain,
+    title: "Auto profiles",
+    description:
+      "AI detects names, addresses, and preferences to keep your customer ledger fresh.",
+  },
+  {
+    icon: CalendarClock,
+    title: "Smart reminders",
+    description:
+      "Get nudges before important customer dates and recurring buying moments.",
+  },
+  {
+    icon: Sparkles,
+    title: "Screen pop",
+    description:
+      "Instant caller recognition with context the moment the phone starts ringing.",
+  },
+  {
+    icon: History,
+    title: "Full history search",
+    description:
+      "Search months of calls and notes with natural keywords and customer tags.",
+  },
+  {
+    icon: Users,
+    title: "Relationship continuity",
+    description:
+      "Make every repeat customer feel remembered with personalized call handling.",
   },
 ];
 
@@ -348,42 +560,42 @@ const pricingPlans = [
     name: "Starter",
     price: 49,
     featured: false,
-    cta: "Start free trial",
-    features: [
-      "100 calls per month",
-      "Real-time transcription",
-      "Basic CRM timeline",
-      "Email support",
-      "7-day history",
-    ],
+    cta: "Choose Starter",
+    features: ["500 minutes/month", "Real-time transcription", "Basic CRM sync"],
   },
   {
     name: "Pro",
-    price: 149,
+    price: 69,
     featured: true,
-    cta: "Start free trial",
+    cta: "Start Pro Trial",
     features: [
-      "500 calls per month",
-      "Advanced AI call insights",
-      "Reminders and follow-ups",
-      "Priority support",
-      "90-day history",
-      "Integrations",
+      "1500 minutes/month",
+      "Priority screen pop",
+      "Smart reminders",
+      "Advanced analytics",
     ],
   },
   {
     name: "Growth",
-    price: 299,
+    price: 99,
     featured: false,
-    cta: "Start free trial",
-    features: [
-      "Unlimited calls",
-      "Multi-location support",
-      "Team collaboration",
-      "Dedicated onboarding",
-      "Unlimited history",
-      "API access",
-    ],
+    cta: "Choose Growth",
+    features: ["Unlimited minutes", "Multi-location support", "Dedicated success lead"],
+  },
+];
+
+const testimonials = [
+  {
+    name: "Julian Thorne",
+    shop: "Thorne & Stem Floral Studio",
+    quote:
+      "CallContext changed how we handle peak season. Customer context appears before hello, and order quality improved immediately.",
+  },
+  {
+    name: "Mara Lin",
+    shop: "Petals & Prose",
+    quote:
+      "Smart reminders increased repeat orders because we finally follow up at the right time, every time.",
   },
 ];
 

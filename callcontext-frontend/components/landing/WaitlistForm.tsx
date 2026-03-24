@@ -75,7 +75,7 @@ export function WaitlistForm() {
 
   if (status === "success") {
     return (
-      <div className="rounded-xl border border-success-500/20 bg-success-50 p-8 text-center">
+      <div className="rounded-xl bg-[#ecfdf5] p-8 text-center">
         <div className="mx-auto mb-6 inline-flex h-16 w-16 items-center justify-center rounded-full bg-success-500">
           <CheckCircle2 className="h-10 w-10 text-white" />
         </div>
@@ -91,8 +91,8 @@ export function WaitlistForm() {
           )}
           We&apos;ll email you when early access opens.
         </p>
-        <div className="rounded-lg border border-brand-200 bg-brand-50 p-4">
-          <p className="text-sm text-brand-700">
+        <div className="rounded-lg bg-[#f6f3ef] p-4">
+          <p className="text-sm text-[#00694e]">
             <span className="font-semibold">Founding offer:</span> early-access accounts receive
             launch pricing for the first 6 months.
           </p>
@@ -104,7 +104,7 @@ export function WaitlistForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-xl border border-warm-200 bg-white p-6 shadow-sm sm:p-8"
+      className="rounded-xl bg-white p-6 sm:p-8"
     >
       <div className="mb-6 grid gap-4 md:grid-cols-2">
         <Input
@@ -154,7 +154,7 @@ export function WaitlistForm() {
       </div>
 
       {status === "error" && (
-        <div className="mb-6 flex items-start gap-3 rounded-md border border-danger-200 bg-danger-50 px-4 py-3">
+        <div className="mb-6 flex items-start gap-3 rounded-md bg-danger-50 px-4 py-3">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-danger-600" />
           <p className="text-sm text-danger-700">{errorMessage}</p>
         </div>
@@ -171,7 +171,7 @@ export function WaitlistForm() {
         {status === "loading" ? "Joining..." : "Join waitlist"}
       </Button>
 
-      <p className="mt-4 text-center text-xs text-warm-500">
+      <p className="mt-5 text-center text-xs text-[#6e7a73]">
         By joining, you agree to receive product updates from CallContext. Unsubscribe anytime.
       </p>
     </form>

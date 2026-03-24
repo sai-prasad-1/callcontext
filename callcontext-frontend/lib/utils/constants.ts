@@ -1,3 +1,5 @@
+import { Feature, type FeatureKey } from "@/lib/authz/features";
+
 export const TWO_PARTY_STATES = new Set([
   "CA",
   "CT",
@@ -32,18 +34,26 @@ export const SENTIMENT_CONFIG = {
   negative: { label: "Negative", color: "text-danger-700", bg: "bg-danger-50" },
 } as const;
 
-export const NAV_ITEMS = [
-  { label: "Dashboard", href: "/", icon: "LayoutDashboard" },
-  { label: "Calls", href: "/calls", icon: "Phone" },
-  { label: "Customers", href: "/customers", icon: "Users" },
-  { label: "Orders", href: "/orders", icon: "ShoppingBag" },
-  { label: "Reminders", href: "/reminders", icon: "Bell" },
-  { label: "Tasks", href: "/tasks", icon: "CheckSquare" },
-  { label: "Marketing", href: "/marketing", icon: "Megaphone" },
-  { label: "Analytics", href: "/analytics", icon: "BarChart3" },
+export type NavItemDef = {
+  label: string;
+  href: string;
+  icon: string;
+  /** Required for RBAC + plan filtering in dashboard shell */
+  feature: FeatureKey;
+};
+
+export const NAV_ITEMS: readonly NavItemDef[] = [
+  { label: "Dashboard", href: "/dashboard", icon: "LayoutDashboard", feature: Feature.DASHBOARD_VIEW },
+  { label: "Calls", href: "/dashboard/calls", icon: "Phone", feature: Feature.CALLS_ACCESS },
+  { label: "Customers", href: "/dashboard/customers", icon: "Users", feature: Feature.CUSTOMERS_ACCESS },
+  { label: "Orders", href: "/dashboard/orders", icon: "ShoppingBag", feature: Feature.ORDERS_ACCESS },
+  { label: "Reminders", href: "/dashboard/reminders", icon: "Bell", feature: Feature.REMINDERS_ACCESS },
+  { label: "Tasks", href: "/dashboard/tasks", icon: "CheckSquare", feature: Feature.TASKS_ACCESS },
+  { label: "Marketing", href: "/dashboard/marketing", icon: "Megaphone", feature: Feature.MARKETING_ACCESS },
+  { label: "Analytics", href: "/dashboard/analytics", icon: "BarChart3", feature: Feature.ANALYTICS_BASIC },
 ] as const;
 
-export const NAV_BOTTOM = [
-  { label: "Automations", href: "/automations", icon: "Zap" },
-  { label: "Settings", href: "/settings", icon: "Settings" },
+export const NAV_BOTTOM: readonly NavItemDef[] = [
+  { label: "Automations", href: "/dashboard/automations", icon: "Zap", feature: Feature.AUTOMATIONS_ACCESS },
+  { label: "Settings", href: "/dashboard/settings", icon: "Settings", feature: Feature.SETTINGS_ACCESS },
 ] as const;

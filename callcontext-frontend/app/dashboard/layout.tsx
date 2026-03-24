@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getDashboardAccess } from "@/lib/authz/server";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -20,11 +21,10 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const { data: shop } = (await supabase
-    .from("shops")
-    .select("name")
-    .eq("owner_id", user.id)
-    .single()) as { data: { name: string } | null };
+  const access = await getDashboardAccess(supabase, user.id);
+  if (!access) {
+    redirect("/signup");
+  }
 
   const userData = {
     email: user.email || "",
@@ -35,7 +35,11 @@ export default async function DashboardLayout({
   return (
     <ToastProvider>
       <div className="min-h-screen flex">
-        <Sidebar user={userData} shopName={shop?.name} />
+        <Sidebar
+          user={userData}
+          shopName={access.shop.name}
+          allowedFeatures={access.allowedFeatures}
+        />
 
         <div className="flex-1 lg:ml-60 flex flex-col">
           <Header user={userData} notificationCount={0} />
@@ -45,7 +49,7 @@ export default async function DashboardLayout({
           </main>
         </div>
 
-        <MobileNav />
+        <MobileNav allowedFeatures={access.allowedFeatures} />
       </div>
     </ToastProvider>
   );

@@ -1,5 +1,9 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## CallContext monorepo docs
+
+- **Roles, plans, and feature gates:** [../docs/authz-rbac-plans.md](../docs/authz-rbac-plans.md) (`lib/authz/`, migrations `005` / `006`).
+
 ## Getting Started
 
 First, run the development server:

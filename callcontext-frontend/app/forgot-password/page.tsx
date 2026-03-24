@@ -21,11 +21,18 @@ export default function ForgotPasswordPage() {
     try {
       const supabase = createClient();
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
+        redirectTo: `${window.location.origin}/api/auth/callback?next=/reset-password`,
       });
 
       if (error) {
-        setError(error.message);
+        if (
+          error.status === 429 ||
+          error.code === "over_email_send_rate_limit"
+        ) {
+          setError("Too many reset requests. Please wait a minute and try again.");
+        } else {
+          setError(error.message);
+        }
       } else {
         setSent(true);
       }
@@ -46,7 +53,8 @@ export default function ForgotPasswordPage() {
           Check your email
         </h2>
         <p className="text-sm text-warm-500 mb-6">
-          We&apos;ve sent a password reset link to <strong>{email}</strong>
+          We&apos;ve sent a password reset link to <strong>{email}</strong>. If
+          you don&apos;t see it, check spam and try again in 60 seconds.
         </p>
         <Link href="/login">
           <Button variant="secondary" className="w-full">

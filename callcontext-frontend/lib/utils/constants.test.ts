@@ -35,10 +35,11 @@ describe("NAV_ITEMS", () => {
     expect(NAV_ITEMS[0]).toHaveProperty("label");
     expect(NAV_ITEMS[0]).toHaveProperty("href");
     expect(NAV_ITEMS[0]).toHaveProperty("icon");
+    expect(NAV_ITEMS[0]).toHaveProperty("feature");
   });
 
-  it("includes Dashboard as first item", () => {
+  it("includes Dashboard as first item under /dashboard", () => {
     expect(NAV_ITEMS[0].label).toBe("Dashboard");
-    expect(NAV_ITEMS[0].href).toBe("/");
+    expect(NAV_ITEMS[0].href).toBe("/dashboard");
   });
 });

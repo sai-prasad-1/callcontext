@@ -3,14 +3,21 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as LucideIcons from "lucide-react";
+import { ALL_FEATURES, type FeatureKey } from "@/lib/authz/features";
 import { NAV_ITEMS } from "@/lib/utils/constants";
 import { cn } from "@/lib/utils/formatting";
 
-export function MobileNav() {
+type MobileNavProps = {
+  allowedFeatures?: FeatureKey[];
+};
+
+export function MobileNav({ allowedFeatures }: MobileNavProps) {
   const pathname = usePathname();
 
-  // Show only first 4 nav items on mobile
-  const mobileItems = NAV_ITEMS.slice(0, 4);
+  const allowed = new Set<FeatureKey>(
+    allowedFeatures?.length ? allowedFeatures : ALL_FEATURES
+  );
+  const mobileItems = NAV_ITEMS.filter((item) => allowed.has(item.feature)).slice(0, 4);
 
   return (
     <nav className="lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-warm-200 z-30">
@@ -18,7 +25,9 @@ export function MobileNav() {
         {mobileItems.map((item) => {
           const Icon =
             LucideIcons[item.icon as keyof typeof LucideIcons] as LucideIcons.LucideIcon;
-          const isActive = pathname === item.href;
+          const isActive =
+            pathname === item.href ||
+            (item.href !== "/dashboard" && pathname.startsWith(`${item.href}/`));
 
           return (
             <Link
