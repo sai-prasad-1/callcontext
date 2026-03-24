@@ -23,13 +23,13 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // Check if email already exists
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('waitlist')
       .select('id, email, position')
       .eq('email', validatedData.email)
-      .single();
+      .single() as { data: { id: string; email: string; position: number } | null; error: any };
 
-    if (existing) {
+    if (existing && !existingError) {
       return NextResponse.json(
         { 
           error: 'This email is already on the waitlist',
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         status: 'pending'
       })
       .select('id, email, referral_code, position')
-      .single();
+      .single() as { data: { id: string; email: string; referral_code: string; position: number } | null; error: any };
 
     if (error) {
       console.error('Waitlist insertion error:', error);
