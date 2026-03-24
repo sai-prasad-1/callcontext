@@ -1,6 +1,7 @@
 /* ─── Smooth Scroll Behavior ─── */
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 6rem;
 }
 
 /* Respect user's motion preferences */
@@ -13,11 +14,6 @@ html {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* ─── Scroll Padding for Fixed Nav ─── */
-html {
-  scroll-padding-top: 6rem;
 }
 
 /* ─── Enhanced Focus States ─── */

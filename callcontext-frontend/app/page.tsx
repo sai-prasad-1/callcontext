@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import LandingPage from "./(marketing)/page";
+import LandingPage from "@/components/landing/LandingPage";
 
 export default async function RootPage({
   searchParams,

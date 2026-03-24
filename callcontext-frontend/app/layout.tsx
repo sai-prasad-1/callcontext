@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { DM_Sans, Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import "./landing.css";
 
 const dmSans = DM_Sans({
   variable: "--font-dm-sans",

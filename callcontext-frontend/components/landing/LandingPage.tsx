@@ -1,6 +1,6 @@
 import { Phone, Zap, TrendingUp, Shield, Brain, Clock, CheckCircle2, ArrowRight, Star } from 'lucide-react';
 import Link from 'next/link';
-import { WaitlistForm } from './WaitlistForm';
+import { WaitlistForm } from '@/components/landing/WaitlistForm';
 
 export default function LandingPage() {
   return (
