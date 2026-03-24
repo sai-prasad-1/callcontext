@@ -22,9 +22,37 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CallContext — Call Intelligence CRM",
+  metadataBase: new URL("https://callcontext.ai"),
+  title: {
+    default: "CallContext — AI Call Intelligence CRM for Small Businesses",
+    template: "%s | CallContext",
+  },
   description:
-    "Real-time call intelligence for small businesses. Auto-transcribe calls, extract customer data, and build relationships effortlessly.",
+    "CallContext helps small businesses capture every customer call, auto-log call details, and improve follow-ups with AI-powered call intelligence.",
+  keywords: [
+    "call intelligence CRM",
+    "small business call tracking",
+    "AI call summary",
+    "phone-first CRM",
+    "call transcription for business",
+  ],
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    title: "CallContext — AI Call Intelligence CRM",
+    description:
+      "Capture call context, automate follow-ups, and improve customer conversion with CallContext.",
+    type: "website",
+    url: "/",
+    siteName: "CallContext",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "CallContext — AI Call Intelligence CRM",
+    description:
+      "Capture call context, automate follow-ups, and improve customer conversion with CallContext.",
+  },
 };
 
 export default function RootLayout({
