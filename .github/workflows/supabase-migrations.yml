@@ -1,0 +1,52 @@
+name: Deploy Supabase Migrations
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+jobs:
+  deploy-migrations:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link Supabase project
+        run: |
+          supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Push migrations
+        run: |
+          supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Generate TypeScript types
+        run: |
+          supabase gen types typescript --linked > callcontext-frontend/lib/types/database.ts
+
+      - name: Commit updated types
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add callcontext-frontend/lib/types/database.ts
+          git diff --staged --quiet || git commit -m "Auto-update database types [skip ci]"
+          
+      - name: Push changes
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}

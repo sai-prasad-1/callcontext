@@ -1,0 +1,44 @@
+# Supabase project configuration
+
+# Project ID (from Supabase dashboard URL)
+project_id = "xyzdhdcwudjjssnpabvs"
+
+# Supabase API URL
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public"]
+max_rows = 1000
+
+# Database settings
+[db]
+port = 54322
+major_version = 15
+
+# Auth settings
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = ["https://callcontext.vercel.app"]
+jwt_expiry = 3600
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = true
+
+# Storage settings
+[storage]
+enabled = true
+file_size_limit = "50MiB"
+
+# Edge Functions
+[functions]
+enabled = false
+
+# Migrations
+[migrations]
+# Automatically apply migrations on start
+auto_apply = false

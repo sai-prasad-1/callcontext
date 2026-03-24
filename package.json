@@ -1,0 +1,10 @@
+{
+  "scripts": {
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset",
+    "db:diff": "supabase db diff",
+    "db:types": "supabase gen types typescript --linked > callcontext-frontend/lib/types/database.ts",
+    "db:migrate": "npm run db:push && npm run db:types",
+    "migration:new": "supabase migration new"
+  }
+}

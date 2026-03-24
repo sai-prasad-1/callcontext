@@ -1,0 +1,471 @@
+# .cursorrules — CallContext Development Rules
+# Place this file in your project root. Cursor reads it automatically.
+
+## Project Overview
+CallContext is a real-time call intelligence CRM for small shop owners (florists first, then bakeries, salons, etc). It captures phone calls via Vonage, transcribes them live with Deepgram, extracts entities with GPT-4o-mini, and auto-builds customer profiles, reminders, and orders.
+
+## Project Documentation
+All project documentation lives in the `docs/` folder at the project root. ALWAYS reference these before building any feature:
+- `docs/engineering-plan.md` — 22-week build plan with every page, endpoint, table, and test
+- `docs/features.md` — Full 200+ feature brainstorm with priorities (P0–P3)
+- `docs/architecture.md` — Scalable 4-layer architecture, scaling milestones, security model
+- `docs/design-system.md` — Colors, typography, components, animations, Tailwind config
+- `docs/project-setup.md` — Step-by-step project initialization guide
+
+When asked to build a feature, check the engineering plan first for exact specs, then the design system for UI patterns.
+
+## Project Structure — Monorepo with Frontend + Backend
+
+```
+callcontext/                   — Project root
+├── .cursorrules               — This file
+├── docs/                      — All project documentation (read-only reference)
+│   ├── engineering-plan.md
+│   ├── features.md
+│   ├── architecture.md
+│   ├── design-system.md
+│   └── project-setup.md
+│
+├── callcontext-frontend/                  — Next.js application (deploys to Vercel)
+│   ├── app/                   — Next.js App Router (pages + API routes)
+│   │   ├── (auth)/            — Public auth pages (no sidebar)
+│   │   ├── (dashboard)/       — Protected pages (sidebar layout)
+│   │   ├── (marketing)/       — Public landing pages
+│   │   ├── (onboarding)/      — Onboarding wizard
+│   │   └── api/               — REST API routes (lightweight, delegates to backend for heavy work)
+│   ├── components/            — React components
+│   │   ├── ui/                — Base reusable UI (Button, Input, Card, Modal, etc.)
+│   │   ├── layout/            — Sidebar, Header, MobileNav
+│   │   ├── calls/             — Call-related components
+│   │   ├── customers/         — Customer-related components
+│   │   └── [feature]/         — Feature-specific components
+│   ├── lib/                   — Shared utilities
+│   │   ├── supabase/          — Supabase clients (client.ts, server.ts, middleware.ts)
+│   │   ├── hooks/             — Custom React hooks
+│   │   ├── types/             — TypeScript types
+│   │   └── utils/             — Utilities (formatting, constants, validation)
+│   ├── public/                — Static assets
+│   ├── postcss.config.mjs     — Tailwind v4 via @tailwindcss/postcss
+│   ├── next.config.ts
+│   ├── middleware.ts          — Auth middleware
+│   ├── package.json
+│   └── tsconfig.json
+│
+├── backend/                   — Backend server (deploys to Railway)
+│   │
+│   │  NOTE: Starting with Node.js/TypeScript. May migrate to Go (Golang)
+│   │  during development if performance needs demand it — especially for
+│   │  WebSocket connection handling, concurrent call processing, and
+│   │  audio streaming pipelines. The API contract (JSON over WebSocket,
+│   │  REST endpoints, database schema) stays the same regardless of
+│   │  backend language. If Go is adopted:
+│   │    - Use Fiber or Chi for HTTP routing
+│   │    - Use gorilla/websocket for WebSocket handling
+│   │    - Use pgx for PostgreSQL (Supabase) connections
+│   │    - Use Go's native concurrency (goroutines) for per-call pipelines
+│   │    - Keep the same API contracts so frontend doesn't change
+│   │
+│   ├── src/                   — Source code (TypeScript version)
+│   │   ├── index.ts           — Express + WebSocket server entry point
+│   │   ├── websocket/
+│   │   │   ├── audioHandler.ts    — Handle incoming Vonage audio streams
+│   │   │   └── dashboardHandler.ts — Handle dashboard live connections
+│   │   ├── transcription/
+│   │   │   ├── deepgramClient.ts  — Deepgram SDK streaming setup
+│   │   │   └── transcriptBuffer.ts — Buffer management for batching
+│   │   ├── ai/
+│   │   │   ├── realtimeExtraction.ts  — 30s batched entity extraction
+│   │   │   ├── postCallAnalysis.ts    — Full post-call AI analysis
+│   │   │   └── prompts.ts            — All LLM prompt templates
+│   │   └── utils/
+│   │       ├── logger.ts          — Structured logging (pino)
+│   │       ├── supabase.ts        — Supabase client for backend
+│   │       └── auth.ts            — WebSocket auth verification
+│   ├── package.json
+│   └── tsconfig.json
+│
+└── supabase/                  — Database migrations (shared by frontend + backend)
+    └── migrations/
+        ├── 001_initial_schema.sql
+        ├── 002_rls_policies.sql
+        └── 003_indexes.sql
+```
+
+### Key Architecture Decisions
+- **Frontend** (Next.js on Vercel): Handles all UI rendering, auth, lightweight API routes (CRUD operations, Stripe/Vonage webhooks). Serverless — auto-scales, no servers to manage.
+- **Backend** (Node.js/Go on Railway): Handles ONLY stateful real-time work — WebSocket audio streaming, Deepgram transcription, AI extraction, live dashboard push. This is the only server you manage.
+- **Database** (Supabase): Shared by both frontend and backend. Frontend uses Supabase client SDK with RLS. Backend uses direct connection for writes during calls.
+- **The split is clean**: Frontend does request-response. Backend does streaming. They share the database but never talk to each other directly.
+
+## Tech Stack
+
+### Frontend (DO NOT deviate)
+- Framework: Next.js 16+ (App Router, NOT Pages Router)
+- Language: TypeScript (strict mode)
+- Styling: Tailwind CSS v4 (theme defined via @theme in globals.css, NOT tailwind.config.ts)
+- Database client: Supabase JS SDK (@supabase/ssr)
+- Data fetching: SWR (client-side), Server Components (server-side)
+- Icons: Lucide React
+- Charts: Recharts
+- Validation: Zod
+- Payments: Stripe (@stripe/stripe-js)
+- Email: Resend
+
+### Backend (may evolve)
+- Starting: Node.js + TypeScript + Express + ws library
+- May migrate to: Go (Golang) + Fiber/Chi + gorilla/websocket
+- Transcription: Deepgram Nova-3 SDK (streaming WebSocket)
+- AI: OpenAI GPT-4o-mini
+- Database: Supabase (direct PostgreSQL connection via pgx if Go, or @supabase/supabase-js if Node)
+- Logging: pino (Node) or zerolog (Go)
+
+### Shared
+- Database: Supabase (PostgreSQL + Auth + Realtime + Storage)
+- Telephony: Vonage Voice API
+- Hosting: Vercel (frontend) + Railway (backend)
+- Monitoring: Sentry (both) + PostHog (frontend)
+
+## Frontend Rules
+
+### Routing
+- Use Next.js App Router route groups: (auth), (dashboard), (onboarding), (marketing)
+- Dashboard layout wraps all protected pages with sidebar + header
+- Auth pages have a clean layout with no sidebar
+- API routes go in callcontext-frontend/app/api/[feature]/route.ts
+
+### Data Fetching
+- Server Components for initial page data (default)
+- Client Components ('use client') only when needed for interactivity
+- SWR for client-side data fetching with caching
+- Supabase Realtime for live updates (calls, screen pops)
+- NEVER fetch data in useEffect — use Server Components or SWR
+
+### API Routes (in frontend)
+- Handle: auth, CRUD operations, Vonage/Stripe webhooks, cron jobs, exports
+- Every route: auth check → input validation (Zod) → business logic → response
+- Always verify shop_id from auth context
+- Return consistent JSON: { data } on success, { error: string } on failure
+- Always return 200 for Vonage webhooks (they retry on non-200)
+- Use Supabase server client with service role for webhooks
+
+### What the frontend API does NOT handle
+- Long-lived WebSocket connections (Vercel times out at 30s)
+- Audio streaming from Vonage
+- Deepgram real-time transcription
+- AI entity extraction during calls
+- Any process that needs to stay alive for more than 30 seconds
+- These all live in the backend (Railway)
+
+## Backend Rules
+
+### Responsibilities (backend ONLY handles these)
+1. Vonage audio WebSocket — receive PCM audio stream for duration of call
+2. Deepgram streaming — forward audio, receive live transcript fragments
+3. Dashboard WebSocket — push live transcript + entities to browser
+4. AI extraction — batch transcript every 30s → GPT-4o-mini → entities
+5. Post-call analysis — full summary + profile update when call ends
+6. Database writes — save transcript, update customer, create orders/reminders
+
+### Connection Management
+```
+Per active call, backend holds:
+  - 1 WebSocket from Vonage (audio in)
+  - 1 WebSocket to Deepgram (audio out, transcript in)
+  - N WebSockets to dashboard tabs (transcript + entities out)
+
+Total memory per call: ~5-10KB
+At 100 concurrent calls: ~1MB
+Bottleneck is WebSocket count, not memory
+```
+
+### If Migrating to Go
+- Keep the same WebSocket message format (JSON) so frontend doesn't change
+- Keep the same Supabase table writes so data layer doesn't change
+- Keep the same Deepgram SDK integration pattern
+- Benefits: goroutines handle 10x more concurrent calls per instance, lower memory, faster audio processing
+- Migrate ONLY when Node.js performance becomes the bottleneck (likely at 200+ concurrent calls)
+
+## Design System (FOLLOW EXACTLY)
+
+### Colors — Tailwind Custom Config
+```
+Brand:     brand-50 through brand-900 (teal green, primary: brand-500 #2D8F6F)
+Accent:    accent-50 through accent-900 (warm amber, primary: accent-400 #F5AD1F)
+Neutrals:  warm-25 through warm-900 (warm grays, NOT cool blue-grays)
+Semantic:  success/warning/danger/info with -50 and -500 and -700 stops
+
+Full specs in docs/design-system.md
+```
+
+### Typography
+- Font sans: 'DM Sans' (body, UI, everything)
+- Font display: 'Outfit' (headings, page titles, stat numbers)
+- Font mono: 'JetBrains Mono' (phone numbers, timestamps, IDs)
+- Base size: 14px (text-sm in Tailwind = 13px for secondary text)
+- Dashboard greeting: font-display text-3xl font-semibold
+- Page titles: font-display text-2xl font-semibold
+- Body text: text-sm (14px) text-warm-700
+- Secondary text: text-xs (13px) text-warm-500
+
+### Component Patterns
+- Buttons: rounded-md, h-9 default, transitions all 150ms
+  - Primary: bg-brand-500 text-white hover:bg-brand-600
+  - Secondary: bg-white border border-warm-200 hover:bg-warm-50
+  - Ghost: bg-transparent hover:bg-warm-100
+  - Danger: bg-red-500 text-white hover:bg-red-700
+- Inputs: h-9, border-warm-200, rounded-md, focus:ring-brand-500
+- Cards: bg-white border border-warm-200 rounded-lg p-5 shadow-sm
+- Badges: rounded-full px-2 py-0.5 text-xs font-medium
+  - Success: bg-success-50 text-success-700 border border-green-200
+  - Warning: bg-warning-50 text-warning-700
+  - Danger: bg-danger-50 text-danger-700
+- Tags: rounded-full px-2.5 py-0.5 text-xs bg-brand-50 text-brand-700 border border-brand-200
+- Avatars: rounded-full, initials on bg-brand-100 text-brand-600
+- Tables: header bg-warm-50 text-xs uppercase tracking-wider text-warm-500
+- Modals: backdrop-blur-sm bg-black/40, modal bg-white rounded-xl shadow-xl
+
+### Spacing
+- Page padding: p-6 (24px)
+- Card padding: p-5 (20px)
+- Between sections: space-y-6
+- Between cards in grid: gap-4
+- Between form fields: space-y-4
+
+### Responsive
+- Sidebar: 240px fixed on desktop (lg+), collapsed to icons on tablet (md), bottom nav on mobile
+- Stat cards: grid-cols-4 lg, grid-cols-2 md, grid-cols-1 sm
+- Tables: overflow-x-auto on mobile, or switch to card layout
+
+### Animations
+- Hover transitions: transition-all duration-150
+- Page enter: animate-in fade-in slide-in-from-bottom-2 duration-200
+- Screen pop: animate-in slide-in-from-top duration-400
+- Entity detected: animate-in slide-in-from-right duration-400
+- Loading skeleton: animate-pulse with warm-100 to warm-150 gradient
+- Pulse dot (live call): custom animation 2s ease-in-out infinite
+
+### Icons
+- Use Lucide React exclusively
+- Size: 16px inline, 20px nav, 24px feature cards
+- Stroke width: 1.5 (default)
+- Color: text-warm-400 (secondary), text-warm-700 (primary), text-white (on buttons)
+
+## Code Style
+
+### TypeScript (both frontend and backend)
+- Strict mode enabled
+- Define interfaces for all API inputs/outputs
+- Use Zod schemas for runtime validation
+- Export types from lib/types/database.ts (auto-generated from Supabase)
+- Prefer `interface` over `type` for object shapes
+- Use `as const` for constant arrays and objects
+
+### React Components (frontend only)
+- Functional components only
+- Use named exports (not default) for non-page components
+- Props interface defined above component
+- Destructure props in function signature
+- Keep components under 150 lines — extract sub-components
+- Use composition over prop drilling
+
+### Naming
+- Components: PascalCase (CustomerProfile.tsx)
+- Hooks: camelCase with use prefix (useWebSocket.ts)
+- Utils: camelCase (formatPhone.ts)
+- API routes: kebab-case directories (api/vonage/answer/route.ts)
+- Database columns: snake_case
+- TypeScript interfaces: PascalCase with descriptive names (CustomerWithCalls)
+- Enums: UPPER_SNAKE_CASE values
+- Go files (if adopted): snake_case (audio_handler.go)
+- Go packages: lowercase single word (websocket, transcription, ai)
+
+### Error Handling
+- API routes: try/catch, return appropriate status codes
+- Client: SWR error states, toast notifications for user-facing errors
+- Never show raw error messages to users
+- Log errors with context (shop_id, call_id, user_id)
+- Vonage webhooks: ALWAYS return 200, log errors separately
+- Backend: structured logging with pino (Node) or zerolog (Go)
+
+### Security (NON-NEGOTIABLE)
+- RLS enabled on EVERY Supabase table
+- Auth check on EVERY frontend API route (except webhooks)
+- Zod validation on EVERY API input
+- Never expose SUPABASE_SERVICE_ROLE_KEY to client/browser
+- Never expose API keys in client-side code
+- Use signed URLs for recording access (1hr expiry)
+- Parameterized queries only (Supabase handles this)
+- NEVER use dangerouslySetInnerHTML
+- Backend WebSocket: verify shop_id from headers before accepting connection
+- Backend dashboard WebSocket: verify Supabase JWT before accepting
+
+## Supabase Patterns
+
+### Client-Side (browser — frontend only)
+```typescript
+import { createBrowserClient } from '@supabase/ssr'
+export const supabase = createBrowserClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+)
+```
+
+### Server-Side (API routes, Server Components — frontend only)
+```typescript
+import { createServerClient } from '@supabase/ssr'
+import { cookies } from 'next/headers'
+// Use for authenticated operations — respects RLS
+```
+
+### Service Role (webhooks, cron, backend server)
+```typescript
+import { createClient } from '@supabase/supabase-js'
+// Use for operations that need to bypass RLS
+// Used in: Vonage webhooks, cron jobs, Railway backend
+// NEVER use in client-side / browser code
+```
+
+### Realtime Subscriptions (frontend)
+```typescript
+supabase
+  .channel('channel-name')
+  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'calls', filter: `shop_id=eq.${shopId}` }, callback)
+  .subscribe()
+```
+
+## Common Patterns
+
+### Frontend Page Layout
+```tsx
+// Server Component page (callcontext-frontend/app/(dashboard)/customers/page.tsx)
+export default async function CustomersPage() {
+  const supabase = await createClient()
+  const { data } = await supabase.from('customers').select('*').order('last_contact_date', { ascending: false })
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="font-display text-2xl font-semibold text-warm-800">Customers</h1>
+        <Button>Add customer</Button>
+      </div>
+      <CustomerTable initialData={data} />
+    </div>
+  )
+}
+```
+
+### Frontend API Route
+```tsx
+// callcontext-frontend/app/api/customers/route.ts
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+
+const schema = z.object({ name: z.string().min(1) })
+
+export async function POST(req: NextRequest) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+    const body = await req.json()
+    const parsed = schema.safeParse(body)
+    if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
+
+    const { data, error } = await supabase.from('customers').insert(parsed.data).select().single()
+    if (error) throw error
+
+    return NextResponse.json(data, { status: 201 })
+  } catch (error) {
+    console.error('Error:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+```
+
+### Frontend Client Component with SWR
+```tsx
+'use client'
+import useSWR from 'swr'
+
+const fetcher = (url: string) => fetch(url).then(r => r.json())
+
+export function CustomerList({ initialData }: { initialData: Customer[] }) {
+  const { data, error, isLoading } = useSWR('/api/customers', fetcher, { fallbackData: initialData })
+
+  if (isLoading) return <Skeleton />
+  if (error) return <ErrorState />
+  if (!data?.length) return <EmptyState />
+
+  return <Table data={data} />
+}
+```
+
+### Backend WebSocket Handler (Node.js)
+```typescript
+// backend/src/websocket/audioHandler.ts
+export function handleAudioStream(ws: WebSocket, shopId: string, callId: string) {
+  const dgConnection = openDeepgramStream()
+
+  ws.on('message', (audio: Buffer) => {
+    dgConnection.send(audio)
+  })
+
+  dgConnection.on('transcript', (data) => {
+    pushToDashboard(shopId, callId, { type: 'transcript', ...data })
+  })
+
+  ws.on('close', () => {
+    dgConnection.finish()
+    runPostCallAnalysis(shopId, callId)
+  })
+}
+```
+
+### Backend WebSocket Handler (Go — if migrated)
+```go
+// backend/websocket/audio_handler.go
+func HandleAudioStream(conn *websocket.Conn, shopID, callID string) {
+    dgConn := openDeepgramStream()
+    defer dgConn.Close()
+
+    for {
+        _, audio, err := conn.ReadMessage()
+        if err != nil {
+            break
+        }
+        dgConn.Send(audio)
+    }
+
+    runPostCallAnalysis(shopID, callID)
+}
+```
+
+## What NOT to do
+
+### Frontend
+- Do NOT use Pages Router (App Router only)
+- Do NOT use Redux, Zustand, or Jotai (SWR + context is enough)
+- Do NOT use CSS modules or styled-components (Tailwind only)
+- Do NOT use any UI library (shadcn, MUI, Chakra) — build from design system
+- Do NOT hardcode colors — use Tailwind config custom colors
+- Do NOT use localStorage for auth tokens (Supabase uses cookies)
+- Do NOT use `any` type — define proper types
+- Do NOT skip Zod validation on API inputs
+- Do NOT use `useEffect` for data fetching
+- Do NOT create API routes for things Supabase can do directly (auth, realtime)
+- Do NOT put WebSocket or streaming logic in frontend API routes (use backend)
+
+### Backend
+- Do NOT serve HTML or frontend assets from the backend
+- Do NOT duplicate auth logic — backend trusts shop_id from Vonage headers or JWT verification
+- Do NOT store state between requests (except active call state in memory)
+- Do NOT use an ORM — use Supabase client or raw SQL via pgx
+- Do NOT build a full REST API on the backend — CRUD lives in frontend API routes
+- Do NOT skip structured logging — every call event must be logged
+
+### Both
+- Do NOT write raw SQL when Supabase query builder works
+- Do NOT store secrets in code — environment variables only
+- Do NOT skip error handling — every async operation needs try/catch or error callback
+- Do NOT ignore the design system — refer to docs/design-system.md for every UI decision
+- Do NOT build features not in the current week's plan — check docs/engineering-plan.md
