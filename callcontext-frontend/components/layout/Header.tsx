@@ -1,11 +1,12 @@
 "use client";
 
-import { Bell, ChevronDown, LogOut, Settings, User } from "lucide-react";
+import { ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
 import { cn } from "@/lib/utils/formatting";
+import { NotificationBell } from "@/components/notifications/NotificationBell";
 
 export interface HeaderProps {
   title?: string;
@@ -14,14 +15,10 @@ export interface HeaderProps {
     firstName?: string | null;
     lastName?: string | null;
   } | null;
-  notificationCount?: number;
+  userId?: string;
 }
 
-export function Header({
-  title,
-  user,
-  notificationCount = 0,
-}: HeaderProps) {
+export function Header({ title, user, userId }: HeaderProps) {
   const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
@@ -60,16 +57,7 @@ export function Header({
       </div>
 
       <div className="flex items-center gap-4">
-        <Link
-          href="/dashboard/settings/notifications"
-          className="relative p-2 text-warm-500 hover:text-warm-700 hover:bg-warm-100 rounded-md transition-colors cursor-pointer"
-          aria-label="Notifications"
-        >
-          <Bell size={20} />
-          {notificationCount > 0 && (
-            <span className="absolute top-1 right-1 w-2 h-2 bg-danger-500 rounded-full" />
-          )}
-        </Link>
+        {userId && <NotificationBell userId={userId} />}
 
         <div className="relative" ref={dropdownRef}>
           <button

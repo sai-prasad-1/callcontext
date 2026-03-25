@@ -564,6 +564,111 @@ export interface Database {
           created_at?: string;
         };
       };
+      segments: {
+        Row: {
+          id: string;
+          shop_id: string;
+          name: string;
+          description: string | null;
+          filter: Json;
+          is_preset: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          shop_id: string;
+          name: string;
+          description?: string | null;
+          filter: Json;
+          is_preset?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          shop_id?: string;
+          name?: string;
+          description?: string | null;
+          filter?: Json;
+          is_preset?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+      };
+      scheduled_actions: {
+        Row: {
+          id: string;
+          shop_id: string;
+          rule_id: string;
+          action_type: "send_sms" | "send_email" | "create_task" | "create_reminder" | "update_customer";
+          action_config: Json;
+          execute_at: string;
+          status: "pending" | "completed" | "failed" | "cancelled";
+          error: string | null;
+          created_at: string;
+          completed_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          shop_id: string;
+          rule_id: string;
+          action_type: "send_sms" | "send_email" | "create_task" | "create_reminder" | "update_customer";
+          action_config: Json;
+          execute_at: string;
+          status?: "pending" | "completed" | "failed" | "cancelled";
+          error?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          shop_id?: string;
+          rule_id?: string;
+          action_type?: "send_sms" | "send_email" | "create_task" | "create_reminder" | "update_customer";
+          action_config?: Json;
+          execute_at?: string;
+          status?: "pending" | "completed" | "failed" | "cancelled";
+          error?: string | null;
+          created_at?: string;
+          completed_at?: string | null;
+        };
+      };
+      api_keys: {
+        Row: {
+          id: string;
+          shop_id: string;
+          name: string;
+          key_hash: string;
+          key_prefix: string;
+          last_used_at: string | null;
+          total_requests: number;
+          revoked: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          shop_id: string;
+          name: string;
+          key_hash: string;
+          key_prefix: string;
+          last_used_at?: string | null;
+          total_requests?: number;
+          revoked?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          shop_id?: string;
+          name?: string;
+          key_hash?: string;
+          key_prefix?: string;
+          last_used_at?: string | null;
+          total_requests?: number;
+          revoked?: boolean;
+          created_at?: string;
+        };
+      };
     };
   };
 }
@@ -584,3 +689,6 @@ export type WebhookEndpoint =
   Database["public"]["Tables"]["webhook_endpoints"]["Row"];
 export type WebhookDelivery =
   Database["public"]["Tables"]["webhook_deliveries"]["Row"];
+export type Segment = Database["public"]["Tables"]["segments"]["Row"];
+export type ScheduledAction = Database["public"]["Tables"]["scheduled_actions"]["Row"];
+export type ApiKey = Database["public"]["Tables"]["api_keys"]["Row"];

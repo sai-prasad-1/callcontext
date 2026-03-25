@@ -15,6 +15,7 @@ const links: LinkDef[] = [
   { href: "/dashboard/settings", label: "Overview", always: true },
   { href: "/dashboard/settings/profile", label: "Profile", always: true },
   { href: "/dashboard/settings/shop", label: "Shop", always: true },
+  { href: "/dashboard/settings/loyalty", label: "Loyalty Program", always: true },
   { href: "/dashboard/settings/billing", label: "Billing", key: "billing" },
   { href: "/dashboard/settings/team", label: "Team", key: "team" },
   { href: "/dashboard/settings/notifications", label: "Notifications", always: true },

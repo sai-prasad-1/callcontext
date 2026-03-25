@@ -51,6 +51,7 @@ export const NAV_ITEMS: readonly NavItemDef[] = [
   { label: "Tasks", href: "/dashboard/tasks", icon: "CheckSquare", feature: Feature.TASKS_ACCESS },
   { label: "Marketing", href: "/dashboard/marketing", icon: "Megaphone", feature: Feature.MARKETING_ACCESS },
   { label: "Analytics", href: "/dashboard/analytics", icon: "BarChart3", feature: Feature.ANALYTICS_BASIC },
+  { label: "Activity", href: "/dashboard/activity", icon: "Activity", feature: Feature.ACTIVITY_FEED },
 ] as const;
 
 export const NAV_BOTTOM: readonly NavItemDef[] = [

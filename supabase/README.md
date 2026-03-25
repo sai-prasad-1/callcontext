@@ -54,11 +54,17 @@ supabase/migrations/007_lookup_user_id_by_email.sql
 ```
 Adds `lookup_user_id_by_email` for the **service role** so the team invite API can attach existing auth users without exposing `auth.users` to clients.
 
+#### Step 8: Fix shop_memberships RLS recursion (team list / 42P17)
+```
+supabase/migrations/008_fix_shop_memberships_rls_recursion.sql
+```
+Replaces the `shop_memberships` SELECT policy that subqueried `shop_memberships` (infinite recursion) with `shop_ids_for_current_user()`, and sets `row_security = off` on that helper so policy checks stay non-recursive.
+
 ---
 
 ## Verify Setup
 
-After running all migrations through `007`, verify everything is working:
+After running all migrations through `008`, verify everything is working:
 
 ### Check Tables
 Go to "Table Editor" in Supabase dashboard - you should see:

@@ -17,6 +17,9 @@ import {
 import Link from "next/link";
 import { Plus_Jakarta_Sans, Work_Sans } from "next/font/google";
 import { WaitlistForm } from "@/components/landing/WaitlistForm";
+import { IndustryCards } from "@/components/landing/IndustryCards";
+import { FeatureBlocks } from "@/components/landing/FeatureBlocks";
+import { FAQAccordion } from "@/components/landing/FAQAccordion";
 
 const headline = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -62,8 +65,8 @@ export default function LandingPage({
             <a href="#pricing" className="text-sm font-medium text-[#3e4944] hover:text-[#00694e]">
               Pricing
             </a>
-            <a href="#resources" className="text-sm font-medium text-[#3e4944] hover:text-[#00694e]">
-              Resources
+            <a href="#faq" className="text-sm font-medium text-[#3e4944] hover:text-[#00694e]">
+              FAQ
             </a>
             <a href="#company" className="text-sm font-medium text-[#3e4944] hover:text-[#00694e]">
               Company
@@ -192,6 +195,8 @@ export default function LandingPage({
           </div>
         </section>
 
+        <IndustryCards />
+
         <section className="bg-[#f0ede9] px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="mb-14 text-center">
@@ -308,26 +313,9 @@ export default function LandingPage({
           </div>
         </section>
 
-        <section id="features" className="px-4 py-20 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <h2
-              className={`${headline.className} mb-14 text-center text-4xl font-extrabold tracking-tight text-[#1c1c19]`}
-            >
-              Tools for the modern artisan
-            </h2>
-            <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-              {features.map((feature) => (
-                <article key={feature.title} className="space-y-3">
-                  <feature.icon className="text-[#00694e]" size={30} />
-                  <h3 className={`${headline.className} text-xl font-bold text-[#1c1c19]`}>
-                    {feature.title}
-                  </h3>
-                  <p className="leading-relaxed text-[#3e4944]">{feature.description}</p>
-                </article>
-              ))}
-            </div>
-          </div>
-        </section>
+        <FeatureBlocks />
+
+        <FAQAccordion />
 
         <section id="pricing" className="bg-[#f0ede9] px-4 py-20 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
@@ -374,6 +362,15 @@ export default function LandingPage({
                   </Link>
                 </article>
               ))}
+            </div>
+            <div className="mt-8 text-center">
+              <Link
+                href="/pricing"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-[#00694e] transition hover:gap-3"
+              >
+                View detailed pricing comparison
+                <ArrowRight size={16} />
+              </Link>
             </div>
           </div>
         </section>
@@ -434,8 +431,8 @@ export default function LandingPage({
             <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#00694e]">Product</h4>
             <ul className="space-y-2 text-sm text-[#3e4944]">
               <li><a href="#features">Features</a></li>
-              <li><a href="#pricing">Pricing</a></li>
-              <li><a href="#resources">Documentation</a></li>
+              <li><Link href="/pricing">Pricing</Link></li>
+              <li><a href="#faq">FAQ</a></li>
             </ul>
           </div>
           <div>
@@ -522,45 +519,6 @@ const steps = [
     title: "Watch the magic",
     description:
       "Entity extraction, reminders, and customer context update automatically.",
-  },
-];
-
-const features = [
-  {
-    icon: Mic,
-    title: "Real-time transcription",
-    description:
-      "Every word captured live so your team focuses on conversation, not note-taking.",
-  },
-  {
-    icon: Brain,
-    title: "Auto profiles",
-    description:
-      "AI detects names, addresses, and preferences to keep your customer ledger fresh.",
-  },
-  {
-    icon: CalendarClock,
-    title: "Smart reminders",
-    description:
-      "Get nudges before important customer dates and recurring buying moments.",
-  },
-  {
-    icon: Sparkles,
-    title: "Screen pop",
-    description:
-      "Instant caller recognition with context the moment the phone starts ringing.",
-  },
-  {
-    icon: History,
-    title: "Full history search",
-    description:
-      "Search months of calls and notes with natural keywords and customer tags.",
-  },
-  {
-    icon: Users,
-    title: "Relationship continuity",
-    description:
-      "Make every repeat customer feel remembered with personalized call handling.",
   },
 ];
 

@@ -43,7 +43,7 @@ export default async function DashboardLayout({
         />
 
         <div className="flex-1 lg:ml-60 flex flex-col">
-          <Header user={userData} notificationCount={0} />
+          <Header user={userData} userId={user.id} />
 
           <main className="flex-1 bg-warm-50 p-6 pb-20 lg:pb-6 overflow-auto">
             {children}

@@ -1,20 +1,13 @@
-import Link from "next/link";
-import {
-  Phone,
-  Users,
-  ShoppingBag,
-  TrendingUp,
-  CheckCircle2,
-  Circle,
-  Clock,
-} from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { loadDashboardAccess } from "@/lib/authz/server";
-import { Card, CardBody, CardHeader } from "@/components/ui/Card";
-import { Badge } from "@/components/ui/Badge";
-import { Button } from "@/components/ui/Button";
-import { EmptyState } from "@/components/ui/EmptyState";
-import { formatRelativeDate } from "@/lib/utils/formatting";
+import { getShopConfig } from "@/lib/utils/shop-config";
+import { DashboardGreeting } from "@/components/dashboard/DashboardGreeting";
+import { OverviewStats } from "@/components/dashboard/OverviewStats";
+import { SetupChecklist } from "@/components/dashboard/SetupChecklist";
+import { ReminderDashboardWidget } from "@/components/reminders/ReminderDashboardWidget";
+import { RecentCallsWidget } from "@/components/dashboard/RecentCallsWidget";
+import { PendingOrdersWidget } from "@/components/dashboard/PendingOrdersWidget";
+import { OpenTasksWidget } from "@/components/dashboard/OpenTasksWidget";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -29,223 +22,196 @@ export default async function DashboardPage() {
   if (!access) return null;
 
   const shop = access.shop;
+  const shopConfig = getShopConfig(shop.settings);
 
-  const stats = [
-    {
-      label: "Total Calls",
-      value: "0",
-      change: "+0%",
-      icon: Phone,
-      color: "text-brand-500",
-    },
-    {
-      label: "Customers",
-      value: "0",
-      change: "+0%",
-      icon: Users,
-      color: "text-accent-500",
-    },
-    {
-      label: "Orders",
-      value: "0",
-      change: "+0%",
-      icon: ShoppingBag,
-      color: "text-success-500",
-    },
-    {
-      label: "Revenue",
-      value: "$0",
-      change: "+0%",
-      icon: TrendingUp,
-      color: "text-info-500",
-    },
-  ];
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayStr = today.toISOString();
 
-  const setupItems = [
-    {
-      id: "phone",
-      label: "Connect phone number",
-      completed: !!shop?.vonage_number,
-      href: "/dashboard/settings/shop",
-    },
-    {
-      id: "greeting",
-      label: "Customize greeting",
-      completed: !!shop?.custom_greeting,
-      href: "/dashboard/settings/shop",
-    },
-    {
-      id: "hours",
-      label: "Set business hours",
-      completed: !!shop?.business_hours,
-      href: "/dashboard/settings/shop",
-    },
-    {
-      id: "profile",
-      label: "Complete your profile",
-      completed: !!(user.user_metadata?.first_name),
-      href: "/dashboard/settings/profile",
-    },
-    {
-      id: "team",
-      label: "Invite team members",
-      completed: false,
-      href: "/dashboard/settings/team",
-    },
-  ];
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  const weekStartStr = weekStart.toISOString();
 
-  const completedCount = setupItems.filter((item) => item.completed).length;
-  const progress = (completedCount / setupItems.length) * 100;
+  const lastWeekStart = new Date(weekStart);
+  lastWeekStart.setDate(weekStart.getDate() - 7);
+  const lastWeekStartStr = lastWeekStart.toISOString();
+
+  const threeDaysFromNow = new Date(today);
+  threeDaysFromNow.setDate(today.getDate() + 3);
+  const threeDaysFromNowStr = threeDaysFromNow.toISOString().split("T")[0];
+
+  const [
+    callsTodayResult,
+    newCustomersTodayResult,
+    missedCallsTodayResult,
+    followUpsPendingResult,
+    callsThisWeekResult,
+    callsLastWeekResult,
+    todayRemindersResult,
+    recentCallsResult,
+    pendingOrdersResult,
+    openTasksResult,
+    hasCustomerResult,
+  ] = await Promise.all([
+    supabase
+      .from("calls")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shop.id)
+      .gte("started_at", todayStr),
+
+    supabase
+      .from("customers")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shop.id)
+      .gte("created_at", todayStr),
+
+    supabase
+      .from("calls")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shop.id)
+      .eq("status", "missed")
+      .gte("started_at", todayStr),
+
+    supabase
+      .from("calls")
+      .select(
+        `
+        id,
+        tasks!left(id, status)
+      `,
+        { count: "exact", head: false }
+      )
+      .eq("shop_id", shop.id)
+      .eq("follow_up_needed", true)
+      .then((result) => {
+        if (!result.data) return { count: 0 };
+        const callsWithoutDoneTasks = result.data.filter((call: any) => {
+          if (!call.tasks || call.tasks.length === 0) return true;
+          return !call.tasks.some((task: any) => task.status === "done");
+        });
+        return { count: callsWithoutDoneTasks.length };
+      }),
+
+    supabase
+      .from("calls")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shop.id)
+      .gte("started_at", weekStartStr),
+
+    supabase
+      .from("calls")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shop.id)
+      .gte("started_at", lastWeekStartStr)
+      .lt("started_at", weekStartStr),
+
+    supabase
+      .from("reminders")
+      .select(
+        `
+        *,
+        customer:customers(id, first_name, last_name, phone)
+      `
+      )
+      .eq("shop_id", shop.id)
+      .eq("status", "pending")
+      .eq("reminder_date", today.toISOString().split("T")[0])
+      .order("reminder_date", { ascending: true })
+      .limit(5),
+
+    supabase
+      .from("calls")
+      .select(
+        `
+        *,
+        customer:customers(id, first_name, last_name, phone)
+      `
+      )
+      .eq("shop_id", shop.id)
+      .order("started_at", { ascending: false })
+      .limit(5),
+
+    supabase
+      .from("orders")
+      .select(
+        `
+        *,
+        customer:customers(id, first_name, last_name, phone)
+      `
+      )
+      .eq("shop_id", shop.id)
+      .in("status", ["pending", "confirmed"])
+      .gte("delivery_date", todayStr)
+      .order("delivery_date", { ascending: true })
+      .limit(5),
+
+    supabase
+      .from("tasks")
+      .select(
+        `
+        *,
+        customer:customers(id, first_name, last_name)
+      `
+      )
+      .eq("shop_id", shop.id)
+      .in("status", ["open", "in_progress"])
+      .or(`due_date.lte.${threeDaysFromNowStr},due_date.is.null`)
+      .order("priority", { ascending: false })
+      .order("due_date", { ascending: true, nullsFirst: false })
+      .limit(5),
+
+    supabase
+      .from("customers")
+      .select("id", { count: "exact", head: true })
+      .eq("shop_id", shop.id)
+      .limit(1),
+  ]);
+
+  const stats = {
+    calls_today: callsTodayResult.count ?? 0,
+    new_customers_today: newCustomersTodayResult.count ?? 0,
+    missed_calls_today: missedCallsTodayResult.count ?? 0,
+    follow_ups_pending:
+      typeof followUpsPendingResult.count === "number"
+        ? followUpsPendingResult.count
+        : 0,
+    calls_this_week: callsThisWeekResult.count ?? 0,
+    calls_last_week: callsLastWeekResult.count ?? 0,
+  };
+
+  const setup = {
+    hasVonageNumber: !!shop.vonage_number,
+    hasGreeting: !!shop.custom_greeting,
+    hasBusinessHours: !!shop.business_hours && Object.keys(shop.business_hours).length > 0,
+    hasCustomer: (hasCustomerResult.count ?? 0) > 0,
+    hasSubscription: !!shop.stripe_subscription_id,
+  };
+
+  const userName =
+    user.user_metadata?.first_name ||
+    user.user_metadata?.last_name
+      ? `${user.user_metadata.first_name ?? ""} ${user.user_metadata.last_name ?? ""}`.trim()
+      : user.email?.split("@")[0] || "there";
+
+  const todayReminders = todayRemindersResult.data ?? [];
+  const recentCalls = recentCallsResult.data ?? [];
+  const pendingOrders = pendingOrdersResult.data ?? [];
+  const openTasks = openTasksResult.data ?? [];
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6">
-      <div>
-        <h1 className="text-2xl font-display font-semibold text-warm-800">
-          Welcome back{user.email ? `, ${user.email.split("@")[0]}` : ""}!
-        </h1>
-        <p className="text-warm-500 mt-1">
-          Here&apos;s what&apos;s happening with your business today.
-        </p>
+    <div className="max-w-7xl mx-auto">
+      <DashboardGreeting userName={userName} />
+
+      <OverviewStats stats={stats} />
+
+      <SetupChecklist setup={setup} />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <ReminderDashboardWidget reminders={todayReminders} />
+        <RecentCallsWidget calls={recentCalls} shopConfig={shopConfig} />
+        <PendingOrdersWidget orders={pendingOrders} shopConfig={shopConfig} />
+        <OpenTasksWidget tasks={openTasks} />
       </div>
-
-      {completedCount < setupItems.length && (
-        <Card>
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-lg font-semibold text-warm-800">Get Started</h2>
-                <p className="text-sm text-warm-500 mt-1">
-                  {completedCount} of {setupItems.length} completed
-                </p>
-              </div>
-              <Badge variant="info">{Math.round(progress)}%</Badge>
-            </div>
-          </CardHeader>
-          <CardBody>
-            <div className="mb-4 h-2 bg-warm-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-brand-500 transition-all duration-300"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
-
-            <div className="space-y-3">
-              {setupItems.map((item) => (
-                <Link
-                  key={item.id}
-                  href={item.href}
-                  className="flex items-center justify-between p-3 rounded-md hover:bg-warm-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    {item.completed ? (
-                      <CheckCircle2 size={20} className="text-success-500 flex-shrink-0" />
-                    ) : (
-                      <Circle size={20} className="text-warm-300 flex-shrink-0" />
-                    )}
-                    <span
-                      className={
-                        item.completed ? "text-warm-500 line-through" : "text-warm-700"
-                      }
-                    >
-                      {item.label}
-                    </span>
-                  </div>
-                  {!item.completed && (
-                    <Button variant="ghost" size="sm">
-                      Setup
-                    </Button>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => (
-          <Card key={stat.label} variant="stat">
-            <CardBody>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-warm-500">{stat.label}</p>
-                  <p className="text-2xl font-semibold text-warm-800 mt-1">{stat.value}</p>
-                  <p className="text-xs text-success-600 mt-1">
-                    {stat.change} from last week
-                  </p>
-                </div>
-                <div
-                  className={`w-12 h-12 rounded-full bg-warm-50 flex items-center justify-center ${stat.color}`}
-                >
-                  <stat.icon size={24} />
-                </div>
-              </div>
-            </CardBody>
-          </Card>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-warm-800">Recent Calls</h2>
-          </CardHeader>
-          <CardBody>
-            <EmptyState
-              icon={Phone}
-              title="No calls yet"
-              description="Calls will appear here once you connect your phone number"
-              action={
-                <Link href="/settings/phone">
-                  <Button variant="primary" size="sm">
-                    Connect Phone
-                  </Button>
-                </Link>
-              }
-            />
-          </CardBody>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold text-warm-800">Upcoming Reminders</h2>
-          </CardHeader>
-          <CardBody>
-            <EmptyState
-              icon={Clock}
-              title="No reminders"
-              description="Create reminders for important customer events"
-              action={
-                <Link href="/reminders">
-                  <Button variant="primary" size="sm">
-                    Create Reminder
-                  </Button>
-                </Link>
-              }
-            />
-          </CardBody>
-        </Card>
-      </div>
-
-      {shop?.subscription_plan === "trial" && (
-        <Card className="border-accent-200 bg-accent-50">
-          <CardBody>
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-semibold text-warm-800">You&apos;re on a free trial</h3>
-                <p className="text-sm text-warm-600 mt-1">
-                  {shop.trial_ends_at
-                    ? `Trial ends ${formatRelativeDate(shop.trial_ends_at)}`
-                    : "14 days remaining"}
-                </p>
-              </div>
-              <Link href="/dashboard/settings/billing">
-                <Button variant="accent">Upgrade Now</Button>
-              </Link>
-            </div>
-          </CardBody>
-        </Card>
-      )}
     </div>
   );
 }
