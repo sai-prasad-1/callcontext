@@ -9,6 +9,7 @@ import {
   Clock,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { loadDashboardAccess } from "@/lib/authz/server";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -24,11 +25,10 @@ export default async function DashboardPage() {
 
   if (!user) return null;
 
-  const { data: shop } = (await supabase
-    .from("shops")
-    .select("*")
-    .eq("owner_id", user.id)
-    .single()) as { data: any | null };
+  const access = await loadDashboardAccess(user.id);
+  if (!access) return null;
+
+  const shop = access.shop;
 
   const stats = [
     {
@@ -66,25 +66,31 @@ export default async function DashboardPage() {
       id: "phone",
       label: "Connect phone number",
       completed: !!shop?.vonage_number,
-      href: "/settings/phone",
+      href: "/dashboard/settings/shop",
     },
     {
       id: "greeting",
       label: "Customize greeting",
       completed: !!shop?.custom_greeting,
-      href: "/settings/greeting",
+      href: "/dashboard/settings/shop",
     },
     {
       id: "hours",
       label: "Set business hours",
       completed: !!shop?.business_hours,
-      href: "/settings/hours",
+      href: "/dashboard/settings/shop",
+    },
+    {
+      id: "profile",
+      label: "Complete your profile",
+      completed: !!(user.user_metadata?.first_name),
+      href: "/dashboard/settings/profile",
     },
     {
       id: "team",
       label: "Invite team members",
       completed: false,
-      href: "/settings/team",
+      href: "/dashboard/settings/team",
     },
   ];
 
@@ -233,7 +239,7 @@ export default async function DashboardPage() {
                     : "14 days remaining"}
                 </p>
               </div>
-              <Link href="/settings/billing">
+              <Link href="/dashboard/settings/billing">
                 <Button variant="accent">Upgrade Now</Button>
               </Link>
             </div>

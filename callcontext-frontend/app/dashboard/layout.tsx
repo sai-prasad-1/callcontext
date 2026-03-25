@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getDashboardAccess } from "@/lib/authz/server";
+import { loadDashboardAccess } from "@/lib/authz/server";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
@@ -21,15 +21,16 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  const access = await getDashboardAccess(supabase, user.id);
+  const access = await loadDashboardAccess(user.id);
   if (!access) {
-    redirect("/signup");
+    redirect("/onboarding");
   }
 
+  const meta = user.user_metadata || {};
   const userData = {
     email: user.email || "",
-    firstName: null,
-    lastName: null,
+    firstName: (meta.first_name as string) || null,
+    lastName: (meta.last_name as string) || null,
   };
 
   return (

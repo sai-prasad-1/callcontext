@@ -1,6 +1,7 @@
 import AuthLayout from "@/components/layout/AuthLayout";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { loadDashboardAccess } from "@/lib/authz/server";
 
 export default async function SignupLayout({
   children,
@@ -13,7 +14,11 @@ export default async function SignupLayout({
   } = await supabase.auth.getUser();
 
   if (user) {
-    redirect("/dashboard");
+    const access = await loadDashboardAccess(user.id);
+    if (access) {
+      redirect("/dashboard");
+    }
+    redirect("/onboarding");
   }
 
   return <AuthLayout>{children}</AuthLayout>;

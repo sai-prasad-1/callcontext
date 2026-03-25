@@ -49,10 +49,22 @@ export async function updateSession(request: NextRequest) {
   // Root path is special - it handles its own redirects
   const isRootPath = pathname === "/";
 
-  // If user is authenticated and trying to access auth pages, redirect to dashboard
+  // Authenticated users hitting login/signup/etc. should skip auth forms
   if (user && isPublicPath && !isRootPath) {
+    const [{ data: owned }, { data: membership }] = await Promise.all([
+      supabase.from("shops").select("id").eq("owner_id", user.id).maybeSingle(),
+      supabase
+        .from("shop_memberships")
+        .select("id")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .limit(1)
+        .maybeSingle(),
+    ]);
+
     const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
+    url.pathname =
+      owned || membership ? "/dashboard" : "/onboarding";
     return NextResponse.redirect(url);
   }
 

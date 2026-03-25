@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { loadDashboardAccess } from "@/lib/authz/server";
 
-export default async function LoginLayout({
+export default async function OnboardingLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -13,12 +13,13 @@ export default async function LoginLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (user) {
-    const access = await loadDashboardAccess(user.id);
-    if (access) {
-      redirect("/dashboard");
-    }
-    redirect("/onboarding");
+  if (!user) {
+    redirect(`/login?message=${encodeURIComponent("Sign in to create your shop.")}`);
+  }
+
+  const access = await loadDashboardAccess(user.id);
+  if (access) {
+    redirect("/dashboard");
   }
 
   return <AuthLayout>{children}</AuthLayout>;

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getDashboardAccess } from "@/lib/authz/server";
+import { loadDashboardAccess } from "@/lib/authz/server";
 import { canAccessFeature } from "@/lib/authz/evaluate";
 import { Feature } from "@/lib/authz/features";
 import { TeamClient } from "@/components/settings/TeamClient";
@@ -12,8 +12,8 @@ export default async function TeamSettingsPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
 
-  const access = await getDashboardAccess(supabase, user.id);
-  if (!access) redirect("/signup");
+  const access = await loadDashboardAccess(user.id);
+  if (!access) redirect("/onboarding");
 
   const showTeam =
     access.role === "owner" ||

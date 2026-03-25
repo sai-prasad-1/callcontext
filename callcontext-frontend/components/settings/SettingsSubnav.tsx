@@ -4,10 +4,21 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils/formatting";
 
-const links = [
+type LinkDef = {
+  href: string;
+  label: string;
+  always?: boolean;
+  key?: "billing" | "team";
+};
+
+const links: LinkDef[] = [
   { href: "/dashboard/settings", label: "Overview", always: true },
-  { href: "/dashboard/settings/billing", label: "Billing", key: "billing" as const },
-  { href: "/dashboard/settings/team", label: "Team", key: "team" as const },
+  { href: "/dashboard/settings/profile", label: "Profile", always: true },
+  { href: "/dashboard/settings/shop", label: "Shop", always: true },
+  { href: "/dashboard/settings/billing", label: "Billing", key: "billing" },
+  { href: "/dashboard/settings/team", label: "Team", key: "team" },
+  { href: "/dashboard/settings/notifications", label: "Notifications", always: true },
+  { href: "/dashboard/settings/security", label: "Security", always: true },
 ];
 
 type SettingsSubnavProps = {
@@ -26,7 +37,7 @@ export function SettingsSubnav({ showBilling, showTeam }: SettingsSubnavProps) {
   });
 
   return (
-    <nav className="mb-8 flex flex-wrap gap-2 border-b border-warm-200 pb-4">
+    <nav className="mb-8 flex flex-wrap gap-2 border-b border-warm-200 pb-4 overflow-x-auto">
       {visible.map((l) => {
         const active =
           l.href === "/dashboard/settings"
@@ -37,7 +48,7 @@ export function SettingsSubnav({ showBilling, showTeam }: SettingsSubnavProps) {
             key={l.href}
             href={l.href}
             className={cn(
-              "rounded-lg px-4 py-2 text-sm font-medium transition-colors",
+              "rounded-lg px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap",
               active
                 ? "bg-brand-50 text-brand-700"
                 : "text-warm-600 hover:bg-warm-100 hover:text-warm-800"

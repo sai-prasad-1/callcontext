@@ -13,5 +13,10 @@ export {
   parseSubscriptionPlan,
 } from "@/lib/authz/plans";
 export { canAccessFeature, listAllowedFeatures } from "@/lib/authz/evaluate";
-export { getDashboardAccess, type DashboardAccess, type ShopRow } from "@/lib/authz/server";
+export {
+  getDashboardAccess,
+  loadDashboardAccess,
+  type DashboardAccess,
+  type ShopRow,
+} from "@/lib/authz/server";
 export { forbiddenUnlessFeature } from "@/lib/authz/guard";

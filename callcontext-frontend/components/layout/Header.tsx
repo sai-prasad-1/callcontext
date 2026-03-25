@@ -2,9 +2,9 @@
 
 import { Bell, ChevronDown, LogOut, Settings, User } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Avatar } from "@/components/ui/Avatar";
-import { Badge } from "@/components/ui/Badge";
 import { cn } from "@/lib/utils/formatting";
 
 export interface HeaderProps {
@@ -15,16 +15,16 @@ export interface HeaderProps {
     lastName?: string | null;
   } | null;
   notificationCount?: number;
-  onLogout?: () => void;
 }
 
 export function Header({
   title,
   user,
   notificationCount = 0,
-  onLogout,
 }: HeaderProps) {
+  const router = useRouter();
   const [showDropdown, setShowDropdown] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -36,26 +36,33 @@ export function Header({
         setShowDropdown(false);
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  async function handleLogout() {
+    setLoggingOut(true);
+    try {
+      await fetch("/api/auth/signout", { method: "POST" });
+      router.push("/login");
+      router.refresh();
+    } catch {
+      setLoggingOut(false);
+    }
+  }
+
   return (
     <header className="h-14 bg-white border-b border-warm-200 flex items-center justify-between px-6">
-      {/* Title */}
       <div>
         {title && (
           <h1 className="text-lg font-semibold text-warm-800">{title}</h1>
         )}
       </div>
 
-      {/* Right Section */}
       <div className="flex items-center gap-4">
-        {/* Notifications */}
         <Link
-          href="/notifications"
-          className="relative p-2 text-warm-500 hover:text-warm-700 hover:bg-warm-100 rounded-md transition-colors"
+          href="/dashboard/settings/notifications"
+          className="relative p-2 text-warm-500 hover:text-warm-700 hover:bg-warm-100 rounded-md transition-colors cursor-pointer"
           aria-label="Notifications"
         >
           <Bell size={20} />
@@ -64,11 +71,10 @@ export function Header({
           )}
         </Link>
 
-        {/* User Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowDropdown(!showDropdown)}
-            className="flex items-center gap-2 p-2 hover:bg-warm-100 rounded-md transition-colors"
+            className="flex items-center gap-2 p-2 hover:bg-warm-100 rounded-md transition-colors cursor-pointer"
           >
             <Avatar
               firstName={user?.firstName}
@@ -88,8 +94,8 @@ export function Header({
               </div>
 
               <Link
-                href="/settings/profile"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-warm-700 hover:bg-warm-50 transition-colors"
+                href="/dashboard/settings/profile"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-warm-700 hover:bg-warm-50 transition-colors cursor-pointer"
                 onClick={() => setShowDropdown(false)}
               >
                 <User size={16} />
@@ -97,8 +103,8 @@ export function Header({
               </Link>
 
               <Link
-                href="/settings"
-                className="flex items-center gap-3 px-4 py-2 text-sm text-warm-700 hover:bg-warm-50 transition-colors"
+                href="/dashboard/settings"
+                className="flex items-center gap-3 px-4 py-2 text-sm text-warm-700 hover:bg-warm-50 transition-colors cursor-pointer"
                 onClick={() => setShowDropdown(false)}
               >
                 <Settings size={16} />
@@ -108,14 +114,12 @@ export function Header({
               <div className="border-t border-warm-150 my-2" />
 
               <button
-                onClick={() => {
-                  setShowDropdown(false);
-                  onLogout?.();
-                }}
-                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 transition-colors"
+                onClick={handleLogout}
+                disabled={loggingOut}
+                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-danger-600 hover:bg-danger-50 transition-colors cursor-pointer disabled:opacity-50"
               >
                 <LogOut size={16} />
-                Log out
+                {loggingOut ? "Signing out…" : "Log out"}
               </button>
             </div>
           )}

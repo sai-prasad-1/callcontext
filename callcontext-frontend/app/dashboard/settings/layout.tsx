@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getDashboardAccess } from "@/lib/authz/server";
+import { loadDashboardAccess } from "@/lib/authz/server";
 import { Feature } from "@/lib/authz/features";
 import { SettingsSubnav } from "@/components/settings/SettingsSubnav";
 
@@ -16,8 +16,8 @@ export default async function SettingsLayout({
 
   if (!user) redirect("/login");
 
-  const access = await getDashboardAccess(supabase, user.id);
-  if (!access) redirect("/signup");
+  const access = await loadDashboardAccess(user.id);
+  if (!access) redirect("/onboarding");
 
   const showBilling = access.allowedFeatures.includes(Feature.SETTINGS_BILLING);
   const showTeam =

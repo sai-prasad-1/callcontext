@@ -30,9 +30,18 @@ const body = Work_Sans({
 
 type LandingPageProps = {
   isAuthenticated?: boolean;
+  /** Logged-in users without a shop should not link to /dashboard (avoid redirect churn). */
+  authenticatedAppHref?: string;
 };
 
-export default function LandingPage({ isAuthenticated = false }: LandingPageProps) {
+export default function LandingPage({
+  isAuthenticated = false,
+  authenticatedAppHref = "/dashboard",
+}: LandingPageProps) {
+  const needsShopSetup = isAuthenticated && authenticatedAppHref !== "/dashboard";
+  const postAuthPrimaryLabel = needsShopSetup ? "Complete setup" : "Go to Dashboard";
+  const postAuthOpenLabel = needsShopSetup ? "Complete setup" : "Open Dashboard";
+  const postAuthFooterLabel = needsShopSetup ? "Complete setup" : "Dashboard";
   return (
     <div className={`${body.className} min-h-screen bg-[#fcf9f5] text-[#1c1c19]`}>
       <header className="sticky top-0 z-40 bg-[#fcf9f5]/90 backdrop-blur-xl">
@@ -64,10 +73,10 @@ export default function LandingPage({ isAuthenticated = false }: LandingPageProp
           <div className="flex items-center gap-3">
             {isAuthenticated ? (
               <Link
-                href="/dashboard"
+                href={authenticatedAppHref}
                 className="rounded-lg bg-[#00694e] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:brightness-110"
               >
-                Go to Dashboard
+                {postAuthPrimaryLabel}
               </Link>
             ) : (
               <>
@@ -354,14 +363,14 @@ export default function LandingPage({ isAuthenticated = false }: LandingPageProp
                     ))}
                   </ul>
                   <Link
-                    href={isAuthenticated ? "/dashboard" : "/signup"}
+                    href={isAuthenticated ? authenticatedAppHref : "/signup"}
                     className={`inline-flex items-center justify-center rounded-lg px-4 py-3 text-sm font-bold transition ${
                       plan.featured
                         ? "bg-white text-[#00694e] hover:brightness-95"
                         : "bg-[#f6f3ef] text-[#00694e] hover:bg-[#ebe8e4]"
                     }`}
                   >
-                    {isAuthenticated ? "Open Dashboard" : plan.cta}
+                    {isAuthenticated ? postAuthOpenLabel : plan.cta}
                   </Link>
                 </article>
               ))}
@@ -441,8 +450,8 @@ export default function LandingPage({ isAuthenticated = false }: LandingPageProp
             <h4 className="mb-4 text-xs font-bold uppercase tracking-widest text-[#00694e]">Access</h4>
             <div className="space-y-2 text-sm">
               {isAuthenticated ? (
-                <Link href="/dashboard" className="block text-[#3e4944] hover:text-[#00694e]">
-                  Dashboard
+                <Link href={authenticatedAppHref} className="block text-[#3e4944] hover:text-[#00694e]">
+                  {postAuthFooterLabel}
                 </Link>
               ) : (
                 <>

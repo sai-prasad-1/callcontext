@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { createClient as createAdminClient } from "@supabase/supabase-js";
-import { TWO_PARTY_STATES } from "@/lib/utils/constants";
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+import { insertShopForOwnerWithServiceRole } from "@/lib/shop/insert-shop-service-role";
 
 export async function POST(request: NextRequest) {
   try {
@@ -100,72 +97,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Determine consent mode based on state
-    const consentMode = TWO_PARTY_STATES.has(state)
-      ? "always_disclose"
-      : "auto";
-
-    // Create shop profile with service-role client.
-    // Reason: with email confirmation enabled, signup may not establish a session yet,
-    // so auth.uid() can be null in this request and RLS insert policies will fail.
-    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceRoleKey) {
-      return NextResponse.json(
-        {
-          error: "Server configuration error",
-          details: "SUPABASE_SERVICE_ROLE_KEY is missing on the server.",
-        },
-        { status: 500 }
-      );
-    }
-
-    const adminSupabase = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceRoleKey
-    );
-
-    const shopPayload = {
-      owner_id: authData.user.id,
-      name: shopName,
+    // Service role: session may be missing until email is verified.
+    const shopResult = await insertShopForOwnerWithServiceRole({
+      ownerId: authData.user.id,
+      shopName,
       country: country || "US",
       state,
-      consent_mode: consentMode as "auto" | "silent" | "always_disclose",
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      subscription_plan: "trial" as const,
-      trial_ends_at: new Date(
-        Date.now() + 14 * 24 * 60 * 60 * 1000
-      ).toISOString(),
-      settings: {},
-    };
+    });
 
-    // Retry briefly for auth.users visibility propagation before failing hard.
-    let shopError: any = null;
-    for (let attempt = 0; attempt < 3; attempt += 1) {
-      const { error } = await adminSupabase.from("shops").insert([shopPayload] as any);
-      shopError = error ?? null;
-
-      if (!shopError) break;
-      if (shopError.code !== "23503") break; // non-FK errors should return immediately
-
-      await sleep(250 * (attempt + 1));
-    }
-
-    if (shopError) {
-      console.error("Shop creation error:", shopError);
-      const message = String(shopError.message || "");
+    if (!shopResult.ok) {
+      console.error("Shop creation error:", shopResult.error, shopResult.details);
       return NextResponse.json(
         {
-          error: "Failed to create shop profile",
-          details:
-            message.toLowerCase().includes("invalid api key")
-              ? "Supabase service role key is invalid. Update SUPABASE_SERVICE_ROLE_KEY in .env.local and restart the server."
-              : shopError.code === "23503"
-              ? "User record is still syncing. Please retry signup once."
-              : shopError.code === "42501"
-              ? "Database permissions error. Please ensure RLS policies are set up correctly."
-              : message,
+          error: shopResult.error,
+          details: shopResult.details,
         },
-        { status: 500 }
+        { status: shopResult.httpStatus }
       );
     }
 

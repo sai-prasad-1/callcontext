@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { loadDashboardAccess } from "@/lib/authz/server";
 import LandingPage from "@/components/landing/LandingPage";
 
 export default async function RootPage({
@@ -34,7 +35,14 @@ export default async function RootPage({
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Always render landing at "/" and let UI adapt based on auth state.
-  return <LandingPage isAuthenticated={Boolean(user)} />;
+  const access = user ? await loadDashboardAccess(user.id) : null;
+  const authenticatedAppHref = user ? (access ? "/dashboard" : "/onboarding") : "/dashboard";
+
+  return (
+    <LandingPage
+      isAuthenticated={Boolean(user)}
+      authenticatedAppHref={authenticatedAppHref}
+    />
+  );
 }
 
