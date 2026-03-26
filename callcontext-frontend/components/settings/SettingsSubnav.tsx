@@ -18,6 +18,7 @@ const links: LinkDef[] = [
   { href: "/dashboard/settings/loyalty", label: "Loyalty Program", always: true },
   { href: "/dashboard/settings/billing", label: "Billing", key: "billing" },
   { href: "/dashboard/settings/team", label: "Team", key: "team" },
+  { href: "/dashboard/settings/api", label: "API & Webhooks", always: true },
   { href: "/dashboard/settings/notifications", label: "Notifications", always: true },
   { href: "/dashboard/settings/security", label: "Security", always: true },
 ];

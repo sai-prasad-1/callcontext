@@ -5,6 +5,7 @@ import { Sidebar } from "@/components/layout/Sidebar";
 import { Header } from "@/components/layout/Header";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { ToastProvider } from "@/components/ui/Toast";
+import { LiveCallNotifications } from "@/components/notifications/LiveCallNotifications";
 
 export default async function DashboardLayout({
   children,
@@ -51,6 +52,8 @@ export default async function DashboardLayout({
         </div>
 
         <MobileNav allowedFeatures={access.allowedFeatures} />
+        
+        <LiveCallNotifications />
       </div>
     </ToastProvider>
   );

@@ -85,6 +85,7 @@
   --animate-slide-in-right: slideInRight 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-slide-in-top: slideInTop 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
   --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  --animate-bounce-gentle: bounce-gentle 1s ease-in-out infinite;
 }
 
 /* Keyframes */
@@ -96,6 +97,17 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+@keyframes bounce-gentle {
+  0%, 100% {
+    transform: translateY(0);
+    animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+  }
+  50% {
+    transform: translateY(-10px);
+    animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+  }
 }
 
 @keyframes fadeInUp {
@@ -116,6 +128,20 @@
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
+}
+
+/* Landing page dark theme animations */
+@keyframes fadeInText {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
 }
 
 /* Base layer */

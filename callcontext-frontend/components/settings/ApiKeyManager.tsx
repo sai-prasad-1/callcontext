@@ -17,7 +17,30 @@ interface ApiKey {
   total_requests: number;
   revoked: boolean;
   created_at: string;
+  scopes?: Record<string, string>;
 }
+
+type ScopeLevel = "none" | "read" | "write" | "admin";
+
+const RESOURCES = [
+  { key: "customers", label: "Customers", description: "Customer profiles and data" },
+  { key: "calls", label: "Calls", description: "Call records and transcripts" },
+  { key: "orders", label: "Orders", description: "Order data" },
+  { key: "notes", label: "Notes", description: "Customer notes" },
+  { key: "reminders", label: "Reminders", description: "Reminder management" },
+  { key: "tasks", label: "Tasks", description: "Task management" },
+  { key: "analytics", label: "Analytics", description: "Analytics data" },
+  { key: "segments", label: "Segments", description: "Customer segments" },
+  { key: "campaigns", label: "Campaigns", description: "Marketing campaigns" },
+  { key: "webhooks", label: "Webhooks", description: "Webhook configuration" },
+];
+
+const SCOPE_LEVELS: { value: ScopeLevel; label: string; description: string }[] = [
+  { value: "none", label: "No Access", description: "Cannot access this resource" },
+  { value: "read", label: "Read", description: "Can read data" },
+  { value: "write", label: "Write", description: "Can create and update data" },
+  { value: "admin", label: "Admin", description: "Full access including delete" },
+];
 
 interface ApiKeyManagerProps {
   initialKeys: ApiKey[];
@@ -27,6 +50,18 @@ export function ApiKeyManager({ initialKeys }: ApiKeyManagerProps) {
   const [keys, setKeys] = useState<ApiKey[]>(initialKeys);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [createName, setCreateName] = useState("");
+  const [scopes, setScopes] = useState<Record<string, ScopeLevel>>({
+    customers: "read",
+    calls: "read",
+    orders: "read",
+    notes: "none",
+    reminders: "none",
+    tasks: "none",
+    analytics: "none",
+    segments: "none",
+    campaigns: "none",
+    webhooks: "none",
+  });
   const [creating, setCreating] = useState(false);
   const [newKey, setNewKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -45,7 +80,7 @@ export function ApiKeyManager({ initialKeys }: ApiKeyManagerProps) {
       const res = await fetch("/api/api-keys", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: createName }),
+        body: JSON.stringify({ name: createName, scopes }),
       });
 
       const data = await res.json();
@@ -54,6 +89,18 @@ export function ApiKeyManager({ initialKeys }: ApiKeyManagerProps) {
       setNewKey(data.key);
       setKeys((prev) => [data.keyData, ...prev]);
       setCreateName("");
+      setScopes({
+        customers: "read",
+        calls: "read",
+        orders: "read",
+        notes: "none",
+        reminders: "none",
+        tasks: "none",
+        analytics: "none",
+        segments: "none",
+        campaigns: "none",
+        webhooks: "none",
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to create API key");
     } finally {
@@ -205,10 +252,10 @@ export function ApiKeyManager({ initialKeys }: ApiKeyManagerProps) {
         isOpen={showCreateModal}
         onClose={handleCloseModal}
         title={newKey ? "API Key Created" : "Create API Key"}
-        size="md"
+        size="lg"
       >
         {!newKey ? (
-          <div className="space-y-4">
+          <div className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-warm-700 mb-2">
                 Key Name
@@ -221,6 +268,45 @@ export function ApiKeyManager({ initialKeys }: ApiKeyManagerProps) {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-warm-700 mb-3">
+                Permissions
+              </label>
+              <p className="text-xs text-warm-600 mb-4">
+                Set specific access levels for each resource. Default is read-only for core resources.
+              </p>
+              <div className="space-y-3 max-h-96 overflow-y-auto border border-warm-200 rounded-lg p-4">
+                {RESOURCES.map((resource) => (
+                  <div key={resource.key} className="flex items-center justify-between py-2 border-b border-warm-100 last:border-0">
+                    <div className="flex-1">
+                      <div className="font-medium text-sm text-warm-900">{resource.label}</div>
+                      <div className="text-xs text-warm-600">{resource.description}</div>
+                    </div>
+                    <select
+                      value={scopes[resource.key]}
+                      onChange={(e) =>
+                        setScopes((prev) => ({
+                          ...prev,
+                          [resource.key]: e.target.value as ScopeLevel,
+                        }))
+                      }
+                      className="ml-4 border border-warm-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      disabled={creating}
+                    >
+                      {SCOPE_LEVELS.map((level) => (
+                        <option key={level.value} value={level.value}>
+                          {level.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 bg-info-50 border border-info-200 rounded-lg p-3 text-xs text-info-700">
+                <strong>Tip:</strong> Start with minimal permissions and expand as needed. You can always create a new key with different permissions.
+              </div>
+            </div>
+
             {error && (
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
                 <AlertCircle size={18} className="text-red-600 flex-shrink-0 mt-0.5" />
@@ -228,7 +314,7 @@ export function ApiKeyManager({ initialKeys }: ApiKeyManagerProps) {
               </div>
             )}
 
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-2 pt-4 border-t border-warm-200">
               <Button variant="outline" onClick={handleCloseModal} disabled={creating}>
                 Cancel
               </Button>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { DM_Sans, Outfit, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, Outfit, JetBrains_Mono, Plus_Jakarta_Sans, Manrope, Inter } from "next/font/google";
 import "./globals.css";
 import "./landing.css";
 
@@ -17,6 +17,24 @@ const outfit = Outfit({
 
 const jetbrainsMono = JetBrains_Mono({
   variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const manrope = Manrope({
+  variable: "--font-manrope",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
@@ -64,7 +82,7 @@ export default function RootLayout({
     <html
       lang="en"
       data-scroll-behavior="smooth"
-      className={`${dmSans.variable} ${outfit.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${dmSans.variable} ${outfit.variable} ${jetbrainsMono.variable} ${plusJakartaSans.variable} ${manrope.variable} ${inter.variable} h-full`}
     >
       <body className="min-h-full flex flex-col font-sans antialiased">
         {children}

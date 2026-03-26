@@ -53,6 +53,27 @@ function hashApiKey(key: string): string {
 
 export interface ApiContext {
   shopId: string;
+  scopes: Record<string, string>;
+}
+
+export type ApiScope = "none" | "read" | "write" | "admin";
+
+export function checkScope(
+  context: ApiContext,
+  resource: string,
+  requiredScope: ApiScope
+): boolean {
+  const keyScope = context.scopes[resource] as ApiScope | undefined;
+  if (!keyScope || keyScope === "none") return false;
+
+  const scopeHierarchy: Record<ApiScope, number> = {
+    none: 0,
+    read: 1,
+    write: 2,
+    admin: 3,
+  };
+
+  return scopeHierarchy[keyScope] >= scopeHierarchy[requiredScope];
 }
 
 type ApiHandler = (
@@ -79,7 +100,7 @@ export function withApiKeyAuth(handler: ApiHandler): any {
 
     const { data: apiKeyRecord, error } = await supabase
       .from("api_keys")
-      .select("id, shop_id, revoked, total_requests")
+      .select("id, shop_id, revoked, total_requests, scopes")
       .eq("key_hash", keyHash)
       .single();
 
@@ -114,6 +135,7 @@ export function withApiKeyAuth(handler: ApiHandler): any {
 
     const context: ApiContext = {
       shopId: apiKeyRecord.shop_id,
+      scopes: (apiKeyRecord.scopes as Record<string, string>) || {},
     };
 
     const params = routeContext?.params ? await routeContext.params : undefined;

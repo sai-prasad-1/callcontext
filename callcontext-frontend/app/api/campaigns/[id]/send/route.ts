@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { getDashboardAccess } from "@/lib/authz/server";
 import { resend } from "@/lib/resend/client";
+import { getTelephonyProvider } from "@/lib/telephony";
 
 export async function POST(
   request: NextRequest,
@@ -68,6 +69,7 @@ export async function POST(
 
   if (campaign.type === "sms") {
     query = query.eq("communication_preference", "sms");
+    query = query.eq("sms_opted_out", false);
   }
 
   query = query.not("tags", "cs", '{"opted_out","unsubscribed"}');
@@ -84,10 +86,23 @@ export async function POST(
 
   let sent = 0;
   let failed = 0;
+  const provider = getTelephonyProvider();
+  const shopPhone = access.shop.vonage_number;
 
   for (const customer of customers || []) {
     try {
       if (campaign.type === "sms") {
+        if (!shopPhone) {
+          console.error("Shop has no phone number configured");
+          failed++;
+          continue;
+        }
+
+        if (customer.sms_opted_out) {
+          console.log(`Skipping opted-out customer: ${customer.phone}`);
+          continue;
+        }
+
         let message = campaign.content;
         message = message.replace(
           /\{\{first_name\}\}/g,
@@ -99,13 +114,92 @@ export async function POST(
         );
         message = message.replace(/\{\{shop_name\}\}/g, access.shop.name);
 
-        console.log(
-          `[STUB] Sending SMS to ${customer.phone}:`,
-          message.substring(0, 50)
-        );
+        message += `\n\nReply STOP to opt out. Unsubscribe: ${process.env.NEXT_PUBLIC_APP_URL}/unsubscribe?phone=${encodeURIComponent(customer.phone)}&shop=${access.shop.id}`;
 
-        sent++;
+        const result = await provider.sendSMS(shopPhone, customer.phone, message);
+
+        if (result.status === 'failed') {
+          console.error(`Failed to send SMS to ${customer.phone}:`, result.error);
+          failed++;
+        } else {
+          sent++;
+        }
       } else if (campaign.type === "email") {
+        if (!customer.email) {
+          console.log(`Skipping customer ${customer.id}: no email`);
+          continue;
+        }
+
+        let emailSubject = campaign.email_subject || "";
+        let emailContent = campaign.email_content || "";
+
+        const currentDate = new Date();
+        const monthName = currentDate.toLocaleString("default", {
+          month: "long",
+        });
+        const year = currentDate.getFullYear();
+
+        emailSubject = emailSubject
+          .replace(/\{\{first_name\}\}/g, customer.first_name || "Customer")
+          .replace(/\{\{last_name\}\}/g, customer.last_name || "")
+          .replace(/\{\{shop_name\}\}/g, access.shop.name)
+          .replace(/\{\{month\}\}/g, monthName)
+          .replace(/\{\{year\}\}/g, year.toString());
+
+        emailContent = emailContent
+          .replace(/\{\{first_name\}\}/g, customer.first_name || "Customer")
+          .replace(/\{\{last_name\}\}/g, customer.last_name || "")
+          .replace(/\{\{shop_name\}\}/g, access.shop.name)
+          .replace(/\{\{month\}\}/g, monthName)
+          .replace(/\{\{year\}\}/g, year.toString());
+
+        const { error: emailError } = await resend.emails.send({
+          from: "noreply@callcontext.ai",
+          to: customer.email,
+          subject: emailSubject,
+          html: emailContent,
+          tags: [
+            { name: "campaign_id", value: campaign.id },
+            { name: "customer_id", value: customer.id },
+          ],
+        });
+
+        if (emailError) {
+          console.error(`Failed to send email to ${customer.email}:`, emailError);
+          failed++;
+        } else {
+          console.log(`Email sent to ${customer.email}`);
+          sent++;
+        }
+      }
+    } catch (error) {
+      console.error(
+        `Failed to send to ${campaign.type === "sms" ? customer.phone : customer.email}:`,
+        error
+      );
+      failed++;
+    }
+  }
+
+  const stats = (campaign.stats as Record<string, number>) || {};
+  const updatedStats = {
+    ...stats,
+    sent,
+    failed,
+    delivered: sent,
+  };
+
+  await supabase
+    .from("campaigns")
+    .update({
+      status: "sent",
+      sent_at: new Date().toISOString(),
+      stats: updatedStats,
+    } as never)
+    .eq("id", id);
+
+  return NextResponse.json({ sent, failed });
+}
         if (!customer.email) {
           console.log(`Skipping customer ${customer.id}: no email`);
           continue;

@@ -1,5 +1,7 @@
 "use client";
 
+import { TestCallButton } from "@/components/debug/TestCallButton";
+
 interface Props {
   userName: string;
 }
@@ -25,11 +27,14 @@ export function DashboardGreeting({ userName }: Props) {
   });
   
   return (
-    <div className="mb-6">
-      <h1 className="text-2xl font-display font-semibold text-warm-800">
-        {greeting}, {firstName}!
-      </h1>
-      <p className="text-warm-500 mt-1">{dateStr}</p>
+    <div className="mb-6 flex items-start justify-between">
+      <div>
+        <h1 className="text-2xl font-display font-semibold text-warm-800">
+          {greeting}, {firstName}!
+        </h1>
+        <p className="text-warm-500 mt-1">{dateStr}</p>
+      </div>
+      <TestCallButton />
     </div>
   );
 }

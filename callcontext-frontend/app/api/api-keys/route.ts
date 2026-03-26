@@ -6,6 +6,7 @@ import crypto from "crypto";
 
 const createApiKeySchema = z.object({
   name: z.string().min(1, "Name is required"),
+  scopes: z.record(z.enum(["none", "read", "write", "admin"])).optional(),
 });
 
 function generateApiKey(): string {
@@ -41,7 +42,7 @@ export async function GET(request: NextRequest) {
 
   const { data: keys, error } = await supabase
     .from("api_keys")
-    .select("id, name, key_prefix, last_used_at, total_requests, revoked, created_at")
+    .select("id, name, key_prefix, last_used_at, total_requests, revoked, created_at, scopes")
     .eq("shop_id", access.shop.id)
     .order("created_at", { ascending: false });
 
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { name } = validation.data;
+  const { name, scopes } = validation.data;
   const apiKey = generateApiKey();
   const keyHash = hashApiKey(apiKey);
   const keyPrefix = apiKey.substring(0, 10) + "...";
@@ -102,8 +103,20 @@ export async function POST(request: NextRequest) {
       name,
       key_hash: keyHash,
       key_prefix: keyPrefix,
+      scopes: scopes || {
+        customers: "read",
+        calls: "read",
+        orders: "read",
+        notes: "none",
+        reminders: "none",
+        tasks: "none",
+        analytics: "none",
+        segments: "none",
+        campaigns: "none",
+        webhooks: "none",
+      },
     })
-    .select("id, name, key_prefix, last_used_at, total_requests, revoked, created_at")
+    .select("id, name, key_prefix, last_used_at, total_requests, revoked, created_at, scopes")
     .single();
 
   if (error) {

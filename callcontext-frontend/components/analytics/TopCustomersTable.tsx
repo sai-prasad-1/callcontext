@@ -94,13 +94,13 @@ export function TopCustomersTable({ customers }: TopCustomersTableProps) {
                     >
                       <Avatar
                         src={customer.avatar_url}
-                        firstName={customer.name.split(" ")[0]}
-                        lastName={customer.name.split(" ").slice(1).join(" ")}
+                        firstName={customer.name?.split(" ")[0] || "Unknown"}
+                        lastName={customer.name?.split(" ").slice(1).join(" ") || ""}
                         size="sm"
                       />
                       <div>
                         <div className="text-sm font-medium text-warm-900">
-                          {customer.name}
+                          {customer.name || customer.phone || "Unknown"}
                         </div>
                         <div className="text-xs text-warm-500">
                           {customer.phone}
